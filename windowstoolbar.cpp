@@ -3,21 +3,25 @@
 #include <QtUiTools/QUiLoader>
 #include <QFile>
 
-#define IDTB_FIRST 3000
+#include <QtDebug>
+
+#include <QWindow>
 
 WindowsToolbar::WindowsToolbar()
+	: _mainWindow(NULL)
 {
 	_configPage = new Ui::ConfigForm();
 }
 
-QString WindowsToolbar::name() const
+WindowsToolbar::~WindowsToolbar()
 {
-	return "WindowsToolBar";
+	delete _configPage;
 }
 
-QString WindowsToolbar::version() const
+void WindowsToolbar::setMainWindow(QMainWindow *mainWindow)
 {
-	return "0.1";
+	_mainWindow = mainWindow;
+	this->init();
 }
 
 QWidget* WindowsToolbar::configPage()
@@ -30,85 +34,38 @@ QWidget* WindowsToolbar::configPage()
 	return formWidget;
 }
 
-#include <QtDebug>
-
-bool WindowsToolbar::winEvent(MSG * message, long * result)
+void WindowsToolbar::init()
 {
-	static UINT taskBarCreatedId = WM_NULL;
-	if (taskBarCreatedId == WM_NULL) {
-		taskBarCreatedId = RegisterWindowMessage(L"TaskbarButtonCreated");
+	QWinThumbnailToolBar *thumbbar = new QWinThumbnailToolBar(_mainWindow);
+	thumbbar->setWindow(_mainWindow->windowHandle());
+
+	QWinThumbnailToolButton *skipBackward = new QWinThumbnailToolButton(thumbbar);
+	QWinThumbnailToolButton *playPause = new QWinThumbnailToolButton(thumbbar);
+	QWinThumbnailToolButton *stop = new QWinThumbnailToolButton(thumbbar);
+	QWinThumbnailToolButton *skipForward = new QWinThumbnailToolButton(thumbbar);
+
+	QSettings settings("MmeMiamMiam", "MmeMiamMiamMusicPlayer");
+	QString theme = settings.value("theme").toString();
+	if (theme.isEmpty()) {
+		theme = "oxygen";
 	}
 
-	if (message->message == taskBarCreatedId) {
-		W7ToolbarInit();
-		//W7ToolbarSetImages();
-		W7ToolbarButtonsInit();
+	skipBackward->setIcon(QIcon(":/player/" + theme + "/skipBackward"));
+	playPause->setIcon(QIcon(":/player/" + theme + "/play"));
+	stop->setIcon(QIcon(":/player/" + theme + "/stop"));
+	skipForward->setIcon(QIcon(":/player/" + theme + "/skipForward"));
 
-	} else switch (message->message){
-	case WM_COMMAND:
-		{
-			int buttonId = LOWORD(message->wParam) - IDTB_FIRST;
+	thumbbar->addButton(skipBackward);
+	thumbbar->addButton(playPause);
+	thumbbar->addButton(stop);
+	thumbbar->addButton(skipForward);
 
-			if ((buttonId >= 0) && (buttonId < 3)) {
-
-				qDebug() << "Button " << buttonId << " was pressed";
-				if (buttonId == 1) { //if "Play|Pause" was pressed
-
-					if (m_thbButtons[1].iBitmap == 1) {
-						m_thbButtons[1].iBitmap = 3;
-						wcscpy(m_thbButtons[1].szTip, L"Pause");
-					} else {
-						m_thbButtons[1].iBitmap = 1;
-						wcscpy(m_thbButtons[1].szTip, L"Play");
-					}
-
-					//W7ToolbarButtonsUpdate();
-				}
-
-			}
-
-
-			break;
-		}
-
-	default:
-		return false;
-
-	}
-
-
-	return false;
+	connect(skipBackward, &QWinThumbnailToolButton::clicked, [=] () {
+		emit skip(false);
+	});
+	connect(skipForward, &QWinThumbnailToolButton::clicked, [=] () {
+		emit skip(true);
+	});
+	connect(playPause, &QWinThumbnailToolButton::clicked, this, &WindowsToolbar::play);
+	connect(stop, &QWinThumbnailToolButton::clicked, this, &WindowsToolbar::stop);
 }
-
-void WindowsToolbar::W7ToolbarInit() {
-	HRESULT hr = CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_ITaskbarList3,
-								  reinterpret_cast<void**> (&(m_w7toolbar)));
-	if (SUCCEEDED(hr)) {
-		hr = m_w7toolbar->HrInit();
-
-		if (FAILED(hr)) {
-			m_w7toolbar->Release();
-			m_w7toolbar = NULL;
-		}
-	}
-}
-
-void WindowsToolbar::W7ToolbarButtonsInit() {
-	QString tooltips[3] = {"Prev", "Play", "Next"};
-
-	for (int index = 0; index < 3; index++) {
-		wcscpy(m_thbButtons[index].szTip, tooltips[index].toStdWString().c_str());
-
-		m_thbButtons[index].iId = IDTB_FIRST + index;
-		m_thbButtons[index].iBitmap = index;
-		m_thbButtons[index].dwMask = (THUMBBUTTONMASK)(THB_BITMAP | THB_FLAGS | THB_TOOLTIP);
-		m_thbButtons[index].dwFlags = (THUMBBUTTONFLAGS)(THBF_ENABLED);
-	}
-
-	if (m_w7toolbar) {
-		//m_w7toolbar->ThumbBarAddButtons(this->winId(), 3, m_thbButtons);
-		HWND truc = 0;
-		m_w7toolbar->ThumbBarAddButtons(truc, 3, m_thbButtons);
-	}
-}
-

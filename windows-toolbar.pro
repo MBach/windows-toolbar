@@ -1,35 +1,17 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2013-11-13T20:19:11
-#
-#-------------------------------------------------
+QT      += widgets uitools winextras
 
-QT      += gui widgets uitools
+QMAKE_CXXFLAGS += -std=c++11
 
 TARGET   = $$qtLibraryTarget(windows-toolbar)
 TEMPLATE = lib
 CONFIG  += plugin
 
-LIBS += libcomctl32 libole32
+HEADERS += windowstoolbar.h \
+    basicplugininterface.h \
+    mediaplayerplugininterface.h
 
 SOURCES += windowstoolbar.cpp
 
-HEADERS += windowstoolbar.h \
-    basicplugininterface.h \
-    mediaplayerplugininterface.h \
-    win7_include.h
+FORMS += config.ui
 
-unix:!symbian {
-    maemo5 {
-        target.path = /opt/usr/lib
-    } else {
-        target.path = /usr/lib
-    }
-    INSTALLS += target
-}
-
-FORMS += \
-    config.ui
-
-RESOURCES += \
-    ressources.qrc
+RESOURCES += resources.qrc

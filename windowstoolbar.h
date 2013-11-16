@@ -4,7 +4,9 @@
 #include "mediaplayerplugininterface.h"
 
 #include "ui_config.h"
-#include "win7_include.h"
+
+#include <QtWinExtras>
+#include <QMainWindow>
 
 class WindowsToolbar : public MediaPlayerPluginInterface
 {
@@ -14,28 +16,23 @@ class WindowsToolbar : public MediaPlayerPluginInterface
 private:
 	Ui::ConfigForm *_configPage;
 
-	THUMBBUTTON m_thbButtons[3];
-	ITaskbarList3* m_w7toolbar;
-
-	WId _winId;
+	QMainWindow *_mainWindow;
 
 public:
 	WindowsToolbar();
 
-	virtual QString name() const;
+	virtual ~WindowsToolbar();
 
-	virtual QString version() const;
+	virtual QString name() const { return "WindowsToolBar"; }
+
+	virtual QString version() const { return "0.1"; }
 
 	QWidget *configPage();
 
-	virtual void setWinId(WId wId) { _winId = wId; }
-
-protected:
-	 bool winEvent(MSG * message, long * result);
+	void setMainWindow(QMainWindow *mainWindow);
 
 private:
-	 void W7ToolbarInit();
-	 void W7ToolbarButtonsInit();
+	void init();
 };
 
 #endif // WINDOWSTOOLBAR_H
