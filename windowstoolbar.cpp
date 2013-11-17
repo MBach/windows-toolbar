@@ -8,9 +8,15 @@
 #include <QWindow>
 
 WindowsToolbar::WindowsToolbar()
-	: _mainWindow(NULL)
+	: _mainWindow(NULL), _skipBackward(NULL), _playPause(NULL), _stop(NULL), _skipForward(NULL)
 {
 	_configPage = new Ui::ConfigForm();
+	/// Hardcoded = wrong! How can I use my custom QSettings class?
+	QSettings settings("MmeMiamMiam", "MmeMiamMiamMusicPlayer");
+	_theme = settings.value("theme").toString();
+	if (_theme.isEmpty()) {
+		_theme = "oxygen";
+	}
 }
 
 WindowsToolbar::~WindowsToolbar()
@@ -21,6 +27,13 @@ WindowsToolbar::~WindowsToolbar()
 void WindowsToolbar::setMainWindow(QMainWindow *mainWindow)
 {
 	_mainWindow = mainWindow;
+}
+
+void WindowsToolbar::setMediaPlayer(QMediaPlayer *mediaPlayer) {
+	_mediaPlayer = mediaPlayer;
+	connect(_mediaPlayer, &QMediaPlayer::positionChanged, this, &WindowsToolbar::updateThumbnailToolBar);
+	connect(_mediaPlayer, &QMediaPlayer::durationChanged, this, &WindowsToolbar::updateThumbnailToolBar);
+	connect(_mediaPlayer, &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateThumbnailToolBar);
 	this->init();
 }
 
@@ -36,36 +49,43 @@ QWidget* WindowsToolbar::configPage()
 
 void WindowsToolbar::init()
 {
-	QWinThumbnailToolBar *thumbbar = new QWinThumbnailToolBar(_mainWindow);
+	QWinThumbnailToolBar *thumbbar = new QWinThumbnailToolBar(this);
 	thumbbar->setWindow(_mainWindow->windowHandle());
 
-	QWinThumbnailToolButton *skipBackward = new QWinThumbnailToolButton(thumbbar);
-	QWinThumbnailToolButton *playPause = new QWinThumbnailToolButton(thumbbar);
-	QWinThumbnailToolButton *stop = new QWinThumbnailToolButton(thumbbar);
-	QWinThumbnailToolButton *skipForward = new QWinThumbnailToolButton(thumbbar);
+	_skipBackward = new QWinThumbnailToolButton(thumbbar);
+	_playPause = new QWinThumbnailToolButton(thumbbar);
+	_stop = new QWinThumbnailToolButton(thumbbar);
+	_skipForward = new QWinThumbnailToolButton(thumbbar);
 
-	QSettings settings("MmeMiamMiam", "MmeMiamMiamMusicPlayer");
-	QString theme = settings.value("theme").toString();
-	if (theme.isEmpty()) {
-		theme = "oxygen";
+	_skipBackward->setIcon(QIcon(":/player/" + _theme + "/skipBackward"));
+	_playPause->setIcon(QIcon(":/player/" + _theme + "/play"));
+	_stop->setIcon(QIcon(":/player/" + _theme + "/stop"));
+	_skipForward->setIcon(QIcon(":/player/" + _theme + "/skipForward"));
+
+	thumbbar->addButton(_skipBackward);
+	thumbbar->addButton(_playPause);
+	thumbbar->addButton(_stop);
+	thumbbar->addButton(_skipForward);
+
+	connect(_skipBackward, &QWinThumbnailToolButton::clicked, [=] () { emit skip(false); });
+	connect(_skipForward, &QWinThumbnailToolButton::clicked, [=] () { emit skip(true); });
+	connect(_playPause, &QWinThumbnailToolButton::clicked, [=]() {
+		if (_mediaPlayer->state() == QMediaPlayer::PlayingState) {
+			_mediaPlayer->pause();
+			_playPause->setIcon(QIcon(":/player/" + _theme + "/play"));
+		} else {
+			_mediaPlayer->play();
+			_playPause->setIcon(QIcon(":/player/" + _theme + "/pause"));
+		}
+	});
+	connect(_stop, &QWinThumbnailToolButton::clicked, _mediaPlayer, &QMediaPlayer::stop);
+}
+
+void WindowsToolbar::updateThumbnailToolBar()
+{
+	if (_mediaPlayer->state() == QMediaPlayer::PlayingState) {
+		_playPause->setIcon(QIcon(":/player/" + _theme + "/pause"));
+	} else {
+		_playPause->setIcon(QIcon(":/player/" + _theme + "/play"));
 	}
-
-	skipBackward->setIcon(QIcon(":/player/" + theme + "/skipBackward"));
-	playPause->setIcon(QIcon(":/player/" + theme + "/play"));
-	stop->setIcon(QIcon(":/player/" + theme + "/stop"));
-	skipForward->setIcon(QIcon(":/player/" + theme + "/skipForward"));
-
-	thumbbar->addButton(skipBackward);
-	thumbbar->addButton(playPause);
-	thumbbar->addButton(stop);
-	thumbbar->addButton(skipForward);
-
-	connect(skipBackward, &QWinThumbnailToolButton::clicked, [=] () {
-		emit skip(false);
-	});
-	connect(skipForward, &QWinThumbnailToolButton::clicked, [=] () {
-		emit skip(true);
-	});
-	connect(playPause, &QWinThumbnailToolButton::clicked, this, &WindowsToolbar::play);
-	connect(stop, &QWinThumbnailToolButton::clicked, this, &WindowsToolbar::stop);
 }

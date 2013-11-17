@@ -18,6 +18,13 @@ private:
 
 	QMainWindow *_mainWindow;
 
+	QString _theme;
+	QMediaPlayer *_mediaPlayer;
+	QWinThumbnailToolButton *_skipBackward;
+	QWinThumbnailToolButton *_playPause;
+	QWinThumbnailToolButton *_stop;
+	QWinThumbnailToolButton *_skipForward;
+
 public:
 	WindowsToolbar();
 
@@ -31,8 +38,13 @@ public:
 
 	void setMainWindow(QMainWindow *mainWindow);
 
+	void setMediaPlayer(QMediaPlayer *mediaPlayer);
+
 private:
 	void init();
+
+private slots:
+	void updateThumbnailToolBar();
 };
 
 #endif // WINDOWSTOOLBAR_H
