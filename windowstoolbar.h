@@ -14,11 +14,9 @@ class WindowsToolbar : public MediaPlayerPluginInterface
 	Q_PLUGIN_METADATA(IID MediaPlayerPluginInterface_iid)
 	Q_INTERFACES(MediaPlayerPluginInterface)
 private:
-	Ui::ConfigForm *_ui;
+	Ui::ConfigForm _ui;
 
 	QMainWindow *_mainWindow;
-
-	QString _theme;
 	QMediaPlayer *_mediaPlayer;
 
 	QWinThumbnailToolButton *_skipBackward;
@@ -29,16 +27,16 @@ private:
 	QWinTaskbarButton* _taskbarButton;
 	QWinTaskbarProgress* _taskbarProgress;
 
+	QWinThumbnailToolBar *_thumbbar;
+
 	QSettings *_settings;
 
 public:
 	WindowsToolbar();
 
-	virtual ~WindowsToolbar();
-
 	virtual QString name() const { return "WindowsToolBar"; }
 
-	virtual QString version() const { return "0.1"; }
+	virtual QString version() const { return "1.0"; }
 
 	QWidget *configPage();
 
@@ -48,9 +46,18 @@ public:
 
 private:
 	void init();
+	void showThumbnailButtons(bool visible);
+	QString theme() const {
+		if (_settings->value("theme").isNull()) {
+			return "oxygen";
+		} else {
+			return _settings->value("theme").toString();
+		}
+	}
 
 private slots:
-	void updateTaskbar();
+	void updateOverlayIcon();
+	void updateProgressbarTaskbar();
 	void updateThumbnailToolBar();
 };
 
