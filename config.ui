@@ -21,7 +21,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QCheckBox" name="progressBarTaskBar">
+       <widget class="QCheckBox" name="progressBarTaskbar">
         <property name="text">
          <string>Progress bar</string>
         </property>
@@ -31,7 +31,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="iconTaskBar">
+       <widget class="QCheckBox" name="overlayIconTaskbar">
         <property name="text">
          <string>Overlay icon</string>
         </property>

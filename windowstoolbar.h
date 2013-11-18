@@ -14,16 +14,22 @@ class WindowsToolbar : public MediaPlayerPluginInterface
 	Q_PLUGIN_METADATA(IID MediaPlayerPluginInterface_iid)
 	Q_INTERFACES(MediaPlayerPluginInterface)
 private:
-	Ui::ConfigForm *_configPage;
+	Ui::ConfigForm *_ui;
 
 	QMainWindow *_mainWindow;
 
 	QString _theme;
 	QMediaPlayer *_mediaPlayer;
+
 	QWinThumbnailToolButton *_skipBackward;
 	QWinThumbnailToolButton *_playPause;
 	QWinThumbnailToolButton *_stop;
 	QWinThumbnailToolButton *_skipForward;
+
+	QWinTaskbarButton* _taskbarButton;
+	QWinTaskbarProgress* _taskbarProgress;
+
+	QSettings *_settings;
 
 public:
 	WindowsToolbar();
@@ -44,6 +50,7 @@ private:
 	void init();
 
 private slots:
+	void updateTaskbar();
 	void updateThumbnailToolBar();
 };
 
