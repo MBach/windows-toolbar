@@ -8,6 +8,8 @@
 #include <QtWinExtras>
 #include <QMainWindow>
 
+#include "settings.h"
+
 class WindowsToolbar : public MediaPlayerPluginInterface
 {
 	Q_OBJECT
@@ -29,7 +31,7 @@ private:
 
 	QWinThumbnailToolBar *_thumbbar;
 
-	QSettings *_settings;
+	Settings *_settings;
 
 public:
 	WindowsToolbar();
@@ -47,13 +49,6 @@ public:
 private:
 	void init();
 	void showThumbnailButtons(bool visible);
-	QString theme() const {
-		if (_settings->value("theme").isNull()) {
-			return "oxygen";
-		} else {
-			return _settings->value("theme").toString();
-		}
-	}
 
 private slots:
 	void updateOverlayIcon();

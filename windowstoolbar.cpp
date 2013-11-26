@@ -9,11 +9,8 @@ WindowsToolbar::WindowsToolbar()
 	: _mainWindow(NULL), _skipBackward(NULL), _playPause(NULL), _stop(NULL), _skipForward(NULL),
 	  _taskbarButton(NULL), _taskbarProgress(NULL), _thumbbar(NULL)
 {
-	/// Should I have to extract "Settings.cpp" and move it into a library?
-	_settings = new QSettings(QCoreApplication::organizationName(), QCoreApplication::applicationName(), this);
-	/*connect(_settings, &Settings::themeHasChanged, [=]() {
-		// stuff
-	});*/
+	_settings = Settings::getInstance();
+	connect(_settings, &Settings::themeHasChanged, this, &WindowsToolbar::updateThumbnailToolBar);
 
 	// First time (ever) the plugin is loaded
 	if (_settings->value("hasProgressBarInTaskbar").isNull()) {
@@ -109,10 +106,10 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 		_thumbbar->addButton(_stop);
 		_thumbbar->addButton(_skipForward);
 
-		_skipBackward->setIcon(QIcon(":/player/" + theme() + "/skipBackward"));
+		_skipBackward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipBackward"));
 		this->updateThumbnailToolBar();
-		_stop->setIcon(QIcon(":/player/" + theme() + "/stop"));
-		_skipForward->setIcon(QIcon(":/player/" + theme() + "/skipForward"));
+		_stop->setIcon(QIcon(":/player/" + _settings->theme() + "/stop"));
+		_skipForward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipForward"));
 
 		// Connect each buttons to the main program
 		connect(_skipBackward, &QWinThumbnailToolButton::clicked, [=] () { emit skip(false); });
@@ -139,10 +136,10 @@ void WindowsToolbar::updateOverlayIcon()
 		switch (_mediaPlayer->state()) {
 		// Icons are inverted from updateThumbnailToolBar() method because it's reflecting the actual state of the player
 		case QMediaPlayer::PlayingState:
-			_taskbarButton->setOverlayIcon(QIcon(":/player/" + theme() + "/play"));
+			_taskbarButton->setOverlayIcon(QIcon(":/player/" + _settings->theme() + "/play"));
 			break;
 		case QMediaPlayer::PausedState:
-			_taskbarButton->setOverlayIcon(QIcon(":/player/" + theme() + "/pause"));
+			_taskbarButton->setOverlayIcon(QIcon(":/player/" + _settings->theme() + "/pause"));
 			break;
 		case QMediaPlayer::StoppedState:
 			_taskbarButton->setOverlayIcon(_stop->icon());
@@ -153,8 +150,12 @@ void WindowsToolbar::updateOverlayIcon()
 	}
 }
 
+#include <filehelper.h>
+
 void WindowsToolbar::updateProgressbarTaskbar()
 {
+	//_mediaPlayer->currentMedia().canonicalUrl().toLocalFile();
+	//qDebug() << file;
 	switch (_mediaPlayer->state()) {
 	case QMediaPlayer::PlayingState:
 		_taskbarProgress->resume();
@@ -172,12 +173,12 @@ void WindowsToolbar::updateProgressbarTaskbar()
 
 void WindowsToolbar::updateThumbnailToolBar()
 {
-	_skipBackward->setIcon(QIcon(":/player/" + theme() + "/skipBackward"));
+	_skipBackward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipBackward"));
 	if (_mediaPlayer->state() == QMediaPlayer::PlayingState) {
-		_playPause->setIcon(QIcon(":/player/" + theme() + "/pause"));
+		_playPause->setIcon(QIcon(":/player/" + _settings->theme() + "/pause"));
 	} else {
-		_playPause->setIcon(QIcon(":/player/" + theme() + "/play"));
+		_playPause->setIcon(QIcon(":/player/" + _settings->theme() + "/play"));
 	}
-	_stop->setIcon(QIcon(":/player/" + theme() + "/stop"));
-	_skipForward->setIcon(QIcon(":/player/" + theme() + "/skipForward"));
+	_stop->setIcon(QIcon(":/player/" + _settings->theme() + "/stop"));
+	_skipForward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipForward"));
 }
