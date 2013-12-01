@@ -18,11 +18,14 @@ HEADERS += windowstoolbar.h \
     mediaplayerplugininterface.h \
     settings.h \
     filehelper.h \
-    miamcore_global.h
+    miamcore_global.h \
+    cover.h \
+    mediaplayer.h
 
 SOURCES += windowstoolbar.cpp
 
 
 FORMS += config.ui
 
-RESOURCES += resources.qrc
+RESOURCES += \
+    resources.qrc

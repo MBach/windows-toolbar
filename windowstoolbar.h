@@ -8,18 +8,20 @@
 #include <QtWinExtras>
 #include <QMainWindow>
 
-#include "settings.h"
+#include <settings.h>
+#include <mediaplayer.h>
 
-class WindowsToolbar : public MediaPlayerPluginInterface
+class WindowsToolbar : public QObject, public MediaPlayerPluginInterface
 {
 	Q_OBJECT
 	Q_PLUGIN_METADATA(IID MediaPlayerPluginInterface_iid)
 	Q_INTERFACES(MediaPlayerPluginInterface)
+
 private:
 	Ui::ConfigForm _ui;
 
 	QMainWindow *_mainWindow;
-	QMediaPlayer *_mediaPlayer;
+    QWeakPointer<MediaPlayer> _mediaPlayer;
 
 	QWinThumbnailToolButton *_skipBackward;
 	QWinThumbnailToolButton *_playPause;
@@ -36,23 +38,29 @@ private:
 public:
 	WindowsToolbar();
 
-	virtual QString name() const { return "WindowsToolBar"; }
+    inline virtual QString name() const { return "WindowsToolBar"; }
 
-	virtual QString version() const { return "1.0"; }
+    inline virtual QString version() const { return "1.0"; }
 
-	QWidget *configPage();
+    virtual QWidget *configPage();
 
-	void setMainWindow(QMainWindow *mainWindow);
+    virtual void setMainWindow(QMainWindow *);
 
-	void setMediaPlayer(QMediaPlayer *mediaPlayer);
+    virtual void setMediaPlayer(QWeakPointer<MediaPlayer>);
 
 private:
 	void init();
 	void showThumbnailButtons(bool visible);
 
 private slots:
+	/** Update the cover when the current media in the player has changed. */
+	void updateCover();
+
 	void updateOverlayIcon();
+
 	void updateProgressbarTaskbar();
+
+	/** Update icons for buttons. */
 	void updateThumbnailToolBar();
 };
 

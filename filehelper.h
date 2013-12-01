@@ -10,7 +10,7 @@
 class Cover;
 
 namespace TagLib {
-	class File;
+    class File;
 }
 
 /**
@@ -19,70 +19,70 @@ namespace TagLib {
 class MIAMCORE_LIBRARY FileHelper
 {
 private:
-	TagLib::File *_file;
+    TagLib::File *_file;
 
-	int fileType;
+    int fileType;
 
-	static const QStringList suff;
+    static const QStringList suff;
 
-	Q_ENUMS(extension)
+    Q_ENUMS(extension)
 
 public:
-	enum extension {
-		APE		= 0,
-		ASF		= 1,
-		FLAC	= 2,
-		MP4		= 4,
-		MPC		= 5,
-		MP3		= 6,
-		OGG		= 7
-	};
+    enum extension {
+        APE		= 0,
+        ASF		= 1,
+        FLAC	= 2,
+        MP4		= 4,
+        MPC		= 5,
+        MP3		= 6,
+        OGG		= 7
+    };
 
-	FileHelper(const QMediaContent &track);
+    FileHelper(const QMediaContent &track);
 
-	FileHelper(const QString &filePath);
+    FileHelper(const QString &filePath);
 
-	virtual ~FileHelper();
+    virtual ~FileHelper();
 
-	inline static QStringList suffixes() { return suff; }
+    inline static QStringList suffixes() { return suff; }
 
-	/** Field ArtistAlbum if exists (in a compilation for example). */
-	QString artistAlbum() const;
+    /** Field ArtistAlbum if exists (in a compilation for example). */
+    QString artistAlbum() const;
 
-	/** Extract the disc number. */
-	int discNumber() const;
+    /** Extract the disc number. */
+    int discNumber() const;
 
-	/** Extract the inner picture if exists. */
-	Cover* extractCover();
+    /** Extract the inner picture if exists. */
+    Cover* extractCover();
 
-	bool insert(QString key, const QVariant &value);
+    bool insert(QString key, const QVariant &value);
 
-	/** Convert the existing rating number into a smaller range from 1 to 5. */
-	int rating() const;
+    /** Convert the existing rating number into a smaller range from 1 to 5. */
+    int rating() const;
 
-	/** Sets the inner picture. */
-	void setCover(Cover *cover);
+    /** Sets the inner picture. */
+    void setCover(Cover *cover);
 
-	void setRating(int rating);
+    void setRating(int rating);
 
-	/// Facade
-	bool isValid() const;
-	QString title() const;
-	QString trackNumber() const;
-	QString album() const;
-	QString length() const;
-	QString artist() const;
-	QString year() const;
-	QString genre() const;
-	QString comment() const;
-	bool save();
+    /// Facade
+    bool isValid() const;
+    QString title() const;
+    QString trackNumber() const;
+    QString album() const;
+    QString length() const;
+    QString artist() const;
+    QString year() const;
+    QString genre() const;
+    QString comment() const;
+    bool save();
 
 private:
-	QString convertKeyToID3v2Key(QString key);
+    QString convertKeyToID3v2Key(QString key);
 
-	QString extractFlacFeature(const QString &featureToExtract) const;
+    QString extractFlacFeature(const QString &featureToExtract) const;
 
-	QString extractMpegFeature(const QString &featureToExtract) const;
+    QString extractMpegFeature(const QString &featureToExtract) const;
 };
 
 #endif // FILEHELPER_H

@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/windows-toolbar">
-        <file>config.ui</file>
+        <file alias="mmmmp">mmmmp.jpg</file>
     </qresource>
 </RCC>

@@ -1,7 +1,14 @@
 #include "windowstoolbar.h"
 
 #include <QFile>
+#include <QLabel>
+#include <QLibrary>
+#include <QMediaContent>
+#include <QMediaPlaylist>
 #include <QWindow>
+
+#include <cover.h>
+#include <filehelper.h>
 
 #include <QtDebug>
 
@@ -26,18 +33,19 @@ void WindowsToolbar::setMainWindow(QMainWindow *mainWindow)
 	_mainWindow = mainWindow;
 }
 
-void WindowsToolbar::setMediaPlayer(QMediaPlayer *mediaPlayer)
+void WindowsToolbar::setMediaPlayer(QWeakPointer<MediaPlayer> mediaPlayer)
 {
 	_mediaPlayer = mediaPlayer;
 	this->init();
-	connect(_mediaPlayer, &QMediaPlayer::positionChanged, [=] (qint64 pos) {
-		if (_mediaPlayer->duration() > 0) {
-			_taskbarProgress->setValue(100 * pos / _mediaPlayer->duration());
+    connect(_mediaPlayer.data(), &QMediaPlayer::positionChanged, [=] (qint64 pos) {
+        if (_mediaPlayer.data()->duration() > 0) {
+            _taskbarProgress->setValue(100 * pos / _mediaPlayer.data()->duration());
 		}
 	});
-	connect(_mediaPlayer, &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateOverlayIcon);
-	connect(_mediaPlayer, &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateThumbnailToolBar);
-	connect(_mediaPlayer, &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateProgressbarTaskbar);
+    connect(_mediaPlayer.data(), &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateOverlayIcon);
+    connect(_mediaPlayer.data(), &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateThumbnailToolBar);
+    connect(_mediaPlayer.data(), &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateProgressbarTaskbar);
+    connect(_mediaPlayer.data(), &QMediaPlayer::currentMediaChanged, this, &WindowsToolbar::updateCover);
 }
 
 QWidget* WindowsToolbar::configPage()
@@ -73,7 +81,9 @@ void WindowsToolbar::init()
 {
 	// Progress bar in the task bar
 	_taskbarButton = new QWinTaskbarButton(this);
-	_taskbarButton->setWindow(_mainWindow->windowHandle());
+	QWindow *window = new QWindow();
+	window->setIcon(QIcon(":/windows-toolbar/mmmmp"));
+	_taskbarButton->setWindow(window);
 	_taskbarProgress = _taskbarButton->progress();
 
 	// Init visibility of progressBar in the taskBar
@@ -112,16 +122,16 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 		_skipForward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipForward"));
 
 		// Connect each buttons to the main program
-		connect(_skipBackward, &QWinThumbnailToolButton::clicked, [=] () { emit skip(false); });
-		connect(_skipForward, &QWinThumbnailToolButton::clicked, [=] () { emit skip(true); });
-		connect(_playPause, &QWinThumbnailToolButton::clicked, [=]() {
-			if (_mediaPlayer->state() == QMediaPlayer::PlayingState) {
-				_mediaPlayer->pause();
+        connect(_skipBackward, &QWinThumbnailToolButton::clicked, _mediaPlayer.data(), &MediaPlayer::skipBackward);
+        connect(_skipForward, &QWinThumbnailToolButton::clicked, _mediaPlayer.data(), &MediaPlayer::skipForward);
+        connect(_playPause, &QWinThumbnailToolButton::clicked, [=]() {
+            if (_mediaPlayer.data()->state() == QMediaPlayer::PlayingState) {
+                _mediaPlayer.data()->pause();
 			} else {
-				_mediaPlayer->play();
+                _mediaPlayer.data()->play();
 			}
 		});
-		connect(_stop, &QWinThumbnailToolButton::clicked, _mediaPlayer, &QMediaPlayer::stop);
+        connect(_stop, &QWinThumbnailToolButton::clicked, _mediaPlayer.data(), &QMediaPlayer::stop);
 	} else if (_thumbbar) {
 		///XXX the thumbnail window is not resizing properly when removing buttons?
 		_thumbbar->clear();
@@ -130,10 +140,36 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 	}
 }
 
+/** Update the cover when the current media in the player has changed. */
+void WindowsToolbar::updateCover()
+{
+    /*FileHelper fh(_mediaPlayer->currentMedia());
+	Cover *cover = fh.extractCover();
+	if (cover) {
+		QPixmap p;
+		bool b = p.loadFromData(cover->byteArray(), cover->format());
+		if (b) {
+			qDebug() << "inner cover was loaded";
+
+			QWindow *window = new QWindow();
+			QWidget *w = QWidget::createWindowContainer(window, new QWidget());
+			QLayout *l = new QHBoxLayout(w);
+			QLabel *imageLabel = new QLabel(w);
+			imageLabel->setPixmap(p);
+			l->addWidget(imageLabel);
+			w->setLayout(l);
+			//w->show();
+			_thumbbar->setWindow(window);
+		}
+	} else {
+		qDebug() << "we need to look at the current dir if " << _mediaPlayer->currentMedia().canonicalUrl().toLocalFile() << "has some picture";
+    }*/
+}
+
 void WindowsToolbar::updateOverlayIcon()
 {
 	if (_settings->value("hasOverlayIcon").toBool()) {
-		switch (_mediaPlayer->state()) {
+        switch (_mediaPlayer.data()->state()) {
 		// Icons are inverted from updateThumbnailToolBar() method because it's reflecting the actual state of the player
 		case QMediaPlayer::PlayingState:
 			_taskbarButton->setOverlayIcon(QIcon(":/player/" + _settings->theme() + "/play"));
@@ -150,13 +186,9 @@ void WindowsToolbar::updateOverlayIcon()
 	}
 }
 
-#include <filehelper.h>
-
 void WindowsToolbar::updateProgressbarTaskbar()
 {
-	//_mediaPlayer->currentMedia().canonicalUrl().toLocalFile();
-	//qDebug() << file;
-	switch (_mediaPlayer->state()) {
+    switch (_mediaPlayer.data()->state()) {
 	case QMediaPlayer::PlayingState:
 		_taskbarProgress->resume();
 		_taskbarProgress->setVisible(_settings->value("hasProgressBarInTaskbar").toBool());
@@ -171,10 +203,11 @@ void WindowsToolbar::updateProgressbarTaskbar()
 	}
 }
 
+/** Update icons for buttons. */
 void WindowsToolbar::updateThumbnailToolBar()
 {
 	_skipBackward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipBackward"));
-	if (_mediaPlayer->state() == QMediaPlayer::PlayingState) {
+    if (_mediaPlayer.data()->state() == QMediaPlayer::PlayingState) {
 		_playPause->setIcon(QIcon(":/player/" + _settings->theme() + "/pause"));
 	} else {
 		_playPause->setIcon(QIcon(":/player/" + _settings->theme() + "/play"));

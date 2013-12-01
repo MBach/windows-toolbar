@@ -8,173 +8,170 @@
 
 class MIAMCORE_LIBRARY Settings : public QSettings
 {
-	Q_OBJECT
+    Q_OBJECT
 
 private:
-	/** The unique instance of this class. */
-	static Settings *settings;
+    /** The unique instance of this class. */
+    static Settings *settings;
 
-	/** Private constructor. */
-	Settings(const QString &organization = "MmeMiamMiam",
-			 const QString &application = "MmeMiamMiamMusicPlayer");
+    /** Private constructor. */
+    Settings(const QString &organization = "MmeMiamMiam",
+             const QString &application = "MmeMiamMiamMusicPlayer");
 
-	/** Store the size of each font used in the app. */
-	QMap<QString, QVariant> fontPointSizeMap;
+    /** Store the size of each font used in the app. */
+    QMap<QString, QVariant> fontPointSizeMap;
 
-	/** Store the family of each font used in the app. */
-	QMap<QString, QVariant> fontFamilyMap;
+    /** Store the family of each font used in the app. */
+    QMap<QString, QVariant> fontFamilyMap;
 
-	QList<QVariant> locations;
+    QList<QVariant> locations;
 
-	QMap<QString, QByteArray> stylesheets;
+    QMap<QString, QByteArray> stylesheets;
 
-	QMap<QString, QVariant> columnStates;
+    QMap<QString, QVariant> columnStates;
 
-	Q_ENUMS(FontFamily)
-	Q_ENUMS(InsertPolicy)
+    Q_ENUMS(FontFamily)
+    Q_ENUMS(InsertPolicy)
 
 public:
-	enum FontFamily{PLAYLIST, LIBRARY, MENUS};
+    enum FontFamily{PLAYLIST, LIBRARY, MENUS};
 
-	enum InsertPolicy { Artist = 0,
-						Album = 1,
-						ArtistAlbum = 2,
-						Year = 3};
+    enum InsertPolicy { Artist = 0,
+                        Album = 1,
+                        ArtistAlbum = 2,
+                        Year = 3};
 
-	/** Singleton Pattern to easily use Settings everywhere in the app. */
-	static Settings* getInstance();
+    /** Singleton Pattern to easily use Settings everywhere in the app. */
+    static Settings* getInstance();
 
-	/** Returns the actual theme name. */
-	QString theme() const;
+    /** Returns the size of the buffer for a cover. */
+    int bufferedCoverSize() const;
 
-	/// Buttons
-	/** Returns the actual size of media buttons. */
-	int buttonsSize() const;
-	bool buttonsFlat() const;
+    /** Returns the actual size of media buttons. */
+    int buttonsSize() const;
 
-	/** Returns true if the button in parameter is visible or not. */
-	///FIXME
-	//bool isVisible(MediaButton *b) const;
+    /** Returns true if buttons are displayed without any border. */
+    bool buttonsFlat() const;
 
-	/** Returns true if stars are visible and active. */
-	inline bool isStarDelegates() const { return value("delegates").toBool(); }
+    /** Returns true if the background color in playlist is using alternatative colors. */
+    bool colorsAlternateBG() const;
 
-	/** Sets the language of the application. */
-	inline void setLanguage(const QString &lang) { setValue("language", lang); }
+    bool copyTracksFromPlaylist() const;
 
-	/** Returns the language of the application. */
-	QString language();
+    /** Returns the size of a cover. */
+    int coverSize() const;
 
-	/** Returns the font of the application. */
-	QFont font(const FontFamily fontFamily);
+    /** Custom icons in CustomizeTheme */
+    const QString customIcon(QPushButton *, bool toggled = false) const;
 
-	/** Sets the font of the application. */
-	int fontSize(const FontFamily fontFamily);
+    const QString dragAndDropBehaviour() const;
 
-	void setMusicLocations(const QStringList &locations);
+    /** Returns the font of the application. */
+    QFont font(const FontFamily fontFamily);
 
-	/** Returns all music locations. */
-	QStringList musicLocations() const;
+    /** Sets the font of the application. */
+    int fontSize(const FontFamily fontFamily);
 
-	bool withCovers() const;
+    /** Custom icons in CustomizeTheme */
+    bool hasCustomIcon(QPushButton *) const;
 
-	/** Returns the size of a cover. */
-	int coverSize() const;
+    /** How tracks are insterted and sorted in the library. */
+    InsertPolicy insertPolicy() const;
 
-	/** Returns the size of the buffer for a cover. */
-	int bufferedCoverSize() const;
+    /** Returns true if covers are displayed in the library. */
+    bool isCoversEnabled() const;
 
-	/** Returns volume from the slider. */
-	int volume() const;
+    bool isCustomColors() const;
 
-	void setShortcut(const QString &objectName, int keySequence);
+    /** Returns true if the button in parameter is visible or not. */
+    bool isMediaButtonVisible(const QString & buttonName) const;
 
-	int shortcut(const QString &objectName) const;
+    /** Returns true if stars are visible and active. */
+    bool isStarDelegates() const;
 
-	QMap<QString, QVariant> shortcuts() const;
+    /** Returns the language of the application. */
+    QString language();
 
-	/// Custom icons in CustomizeTheme
-	bool hasCustomIcon(QPushButton *) const;
-	void setCustomIcon(QPushButton *, const QString &buttonName);
-	const QString customIcon(QPushButton *, bool toggled = false) const;
+    /** Returns all music locations. */
+    QStringList musicLocations() const;
 
-	/// PlayBack options
-	qint64 playbackSeekTime() const;
-	bool playbackKeepPlaylists() const;
+    /// PlayBack options
+    qint64 playbackSeekTime() const;
+    bool playbackKeepPlaylists() const;
 
-	/// Colors
-	bool colorsAlternateBG() const;
-	bool customColors() const;
+    QByteArray restoreColumnStateForPlaylist(int playlistIndex) const;
 
-	/// Stylesheet
-	//QString styleSheet(QWidget *w) const;
+    void saveColumnStateForPlaylist(int playlistIndex, const QByteArray &state);
 
-	bool copyTracksFromPlaylist() const { return value("copyTracksFromPlaylist").toBool(); }
+    /** Custom icons in CustomizeTheme */
+    void setCustomIcon(QPushButton *, const QString &buttonName);
 
-	QString dragAndDropBehaviour() const { return value("dragAndDropBehaviour").toString(); }
+    void setInsertPolicy(InsertPolicy policy);
 
-	void saveColumnStateForPlaylist(int playlistIndex, const QByteArray &state);
+    /** Sets the language of the application. */
+    void setLanguage(const QString &lang);
 
-	QByteArray restoreColumnStateForPlaylist(int playlistIndex) const;
+    void setMusicLocations(const QStringList &locations);
 
-	InsertPolicy insertPolicy() const;
-	void setInsertPolicy(InsertPolicy policy);
+    void setShortcut(const QString &objectName, int keySequence);
+
+    int shortcut(const QString &objectName) const;
+
+    QMap<QString, QVariant> shortcuts() const;
+
+    /** Returns the actual theme name. */
+    QString theme() const;
+
+    /** Returns volume from the slider. */
+    int volume() const;
 
 public slots:
-	/** Sets a new theme. */
-	void setThemeName(const QString &theme);
 
-	/** Sets a new button size. */
-	inline void setButtonsSize(const int &s) { setValue("buttonsSize", s); }
-	inline void setButtonsFlat(bool b) { setValue("buttonsFlat", b); }
+    /** Sets the size of the buffer for a cover. */
+    void setBufferedCoverSize(int i);
 
-	/** Sets if the button in parameter is visible or not. */
-	//void setVisible(MediaButton *b, const bool &value);
+    /** Sets a new button size. */
+    void setButtonsSize(const int &s);
+    void setButtonsFlat(bool b);
 
-	/** Sets if stars are visible and active. */
-	inline void setDelegates(const bool &value) { setValue("delegates", value); }
+    /// Colors
+    void setColorsAlternateBG(bool b);
 
-	/** Sets the font of a part of the application. */
-	inline void setFont(const FontFamily &fontFamily, const QFont &font) {
-		fontFamilyMap.insert(QString(fontFamily), font.family());
-		setValue("fontFamilyMap", fontFamilyMap);
-	}
+    void setCopyTracksFromPlaylist(bool b);
 
-	/** Sets the font size of a part of the application. */
-	inline void setFontPointSize(const FontFamily &fontFamily, int i) {
-		fontPointSizeMap.insert(QString(fontFamily), i);
-		setValue("fontPointSizeMap", fontPointSizeMap);
-	}
+    void setCovers(bool b);
 
-	inline void setCovers(bool b) { setValue("covers", b); }
+    void setCustomColors(bool b);
 
-	/** Sets the size of the buffer for a cover. */
-	inline void setBufferedCoverSize(int i) { setValue("bufferedCoverSize", i); }
+    /// StyleSheets
+    void setCustomStyleSheet(QWidget *w);
 
-	/** Sets volume from the slider. */
-	inline void setVolume(int v) { setValue("volume", v); }
+    /** Sets if stars are visible and active. */
+    void setDelegates(const bool &value);
 
-	/// PlayBack options
-	inline void setPlaybackSeekTime(int t) { setValue("playbackSeekTime", t*1000); }
-	inline void setPlaybackKeepPlaylists(bool b) { setValue("playbackKeepPlaylists", b); }
+    void setDragAndDropBehaviour();
 
-	/// Colors
-	inline void setColorsAlternateBG(bool b) { setValue("colorsAlternateBG", b); }
-	inline void setCustomColors(bool b) { setValue("customColors", b); }
+    /** Sets the font of a part of the application. */
+    void setFont(const FontFamily &fontFamily, const QFont &font);
 
-	/// StyleSheets
-	inline void setCustomStyleSheet(QWidget *w) {
-		QMap<QString, QVariant> map = value("styleSheet").toMap();
-		map.insert(w->metaObject()->className(), w->styleSheet());
-		this->setValue("styleSheet", map);
-	}
+    /** Sets the font size of a part of the application. */
+    void setFontPointSize(const FontFamily &fontFamily, int i);
 
-	inline void setCopyTracksFromPlaylist(bool b) { setValue("copyTracksFromPlaylist", b); }
+    /** Sets if the button in parameter is visible or not. */
+    void setMediaButtonVisible(const QString & buttonName, const bool &value);
 
-	inline void setDragAndDropBehaviour() { setValue("dragAndDropBehaviour", sender()->objectName()); }
+    /// PlayBack options
+    void setPlaybackSeekTime(int t);
+    void setPlaybackKeepPlaylists(bool b);
+
+    /** Sets a new theme. */
+    void setThemeName(const QString &theme);
+
+    /** Sets volume from the slider. */
+    void setVolume(int v);
 
 signals:
-	void themeHasChanged();
+    void themeHasChanged();
 };
 
 #endif // SETTINGS_H

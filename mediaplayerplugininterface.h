@@ -4,27 +4,23 @@
 #include "basicplugininterface.h"
 
 #include <QMainWindow>
-#include <QMediaPlayer>
+#include <mediaplayer.h>
 
 class MediaPlayerPluginInterface : public BasicPluginInterface
 {
-	Q_OBJECT
 public:
-	virtual ~MediaPlayerPluginInterface() {}
+    virtual ~MediaPlayerPluginInterface() {}
 
-	virtual void setMainWindow(QMainWindow *) {}
+    virtual void setMainWindow(QMainWindow *) = 0;
 
-	virtual void setMediaPlayer(QMediaPlayer *) {}
-
-signals:
-	void pause();
-	void play();
-	void skip(bool forward);
-	void stop();
+    virtual void setMediaPlayer(QWeakPointer<MediaPlayer>) = 0;
 };
+QT_BEGIN_NAMESPACE
 
 #define MediaPlayerPluginInterface_iid "MmeMiamMiamMusicPlayer.MediaPlayerPluginInterface"
 
 Q_DECLARE_INTERFACE(MediaPlayerPluginInterface, MediaPlayerPluginInterface_iid)
+
+QT_END_NAMESPACE
 
 #endif // MEDIAPLAYERPLUGININTERFACE_H
