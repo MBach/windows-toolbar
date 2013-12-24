@@ -7,22 +7,22 @@
 
 class MIAMCORE_LIBRARY MediaPlayer : public QMediaPlayer
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit MediaPlayer(QObject *parent = 0);
+    explicit MediaPlayer(QObject *parent = 0);
 
 public slots:
-	/** Seek backward in the current playing track for a small amount of time. */
-	void seekBackward();
+    /** Seek backward in the current playing track for a small amount of time. */
+    void seekBackward();
 
-	/** Seek forward in the current playing track for a small amount of time. */
-	void seekForward();
+    /** Seek forward in the current playing track for a small amount of time. */
+    void seekForward();
 
-	/** Change the current track. */
-	void skipBackward();
+    /** Change the current track. */
+    void skipBackward();
 
-	/** Change the current track. */
-	void skipForward();
+    /** Change the current track. */
+    void skipForward();
 
 signals:
 

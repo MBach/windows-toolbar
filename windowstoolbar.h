@@ -11,6 +11,8 @@
 #include <settings.h>
 #include <mediaplayer.h>
 
+#include "miamcore_global.h"
+
 class WindowsToolbar : public QObject, public MediaPlayerPluginInterface
 {
 	Q_OBJECT
@@ -20,7 +22,6 @@ class WindowsToolbar : public QObject, public MediaPlayerPluginInterface
 private:
 	Ui::ConfigForm _ui;
 
-	QMainWindow *_mainWindow;
     QWeakPointer<MediaPlayer> _mediaPlayer;
 
 	QWinThumbnailToolButton *_skipBackward;
@@ -42,9 +43,9 @@ public:
 
     inline virtual QString version() const { return "1.0"; }
 
-    virtual QWidget *configPage();
+    inline virtual bool providesView() const { return false; }
 
-    virtual void setMainWindow(QMainWindow *);
+    virtual QWidget *configPage();
 
     virtual void setMediaPlayer(QWeakPointer<MediaPlayer>);
 

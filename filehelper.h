@@ -3,9 +3,10 @@
 
 #include <QtMultimedia/QMediaContent>
 #include <QStringList>
-#include <QVariant>
 
 #include "miamcore_global.h"
+
+#include <QFileInfo>
 
 class Cover;
 
@@ -25,10 +26,13 @@ private:
 
     static const QStringList suff;
 
+    QFileInfo _fileInfo;
+
     Q_ENUMS(extension)
 
 public:
     enum extension {
+        UNKNOWN = -1,
         APE		= 0,
         ASF		= 1,
         FLAC	= 2,
@@ -49,13 +53,16 @@ public:
     /** Field ArtistAlbum if exists (in a compilation for example). */
     QString artistAlbum() const;
 
-    /** Extract the disc number. */
+    /** Extract field disc number. */
     int discNumber() const;
 
     /** Extract the inner picture if exists. */
     Cover* extractCover();
 
     bool insert(QString key, const QVariant &value);
+
+    /** Check if file has an inner picture. */
+    bool hasCover() const;
 
     /** Convert the existing rating number into a smaller range from 1 to 5. */
     int rating() const;
@@ -76,6 +83,7 @@ public:
     QString genre() const;
     QString comment() const;
     bool save();
+    inline QFileInfo fileInfo() const { return _fileInfo; }
 
 private:
     QString convertKeyToID3v2Key(QString key);

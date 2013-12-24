@@ -1,4 +1,4 @@
-QT      += widgets multimedia winextras
+QT      += gui widgets multimedia winextras
 
 QMAKE_CXXFLAGS += -std=c++11
 

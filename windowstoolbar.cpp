@@ -12,9 +12,11 @@
 
 #include <QtDebug>
 
+#include <QGuiApplication>
+
 WindowsToolbar::WindowsToolbar()
-	: _mainWindow(NULL), _skipBackward(NULL), _playPause(NULL), _stop(NULL), _skipForward(NULL),
-	  _taskbarButton(NULL), _taskbarProgress(NULL), _thumbbar(NULL)
+    : /*_mainWindow(NULL),*/ _skipBackward(NULL), _playPause(NULL), _stop(NULL), _skipForward(NULL),
+      _taskbarProgress(NULL), _thumbbar(NULL)
 {
 	_settings = Settings::getInstance();
 	connect(_settings, &Settings::themeHasChanged, this, &WindowsToolbar::updateThumbnailToolBar);
@@ -26,12 +28,14 @@ WindowsToolbar::WindowsToolbar()
 	if (_settings->value("hasMediaPlayerButtonsInThumbnail").isNull()) {
 		_settings->setValue("hasMediaPlayerButtonsInThumbnail", true);
 	}
+
+    _taskbarButton = new QWinTaskbarButton(this);
 }
 
-void WindowsToolbar::setMainWindow(QMainWindow *mainWindow)
+/*void WindowsToolbar::setMainWindow(QMainWindow *mainWindow)
 {
 	_mainWindow = mainWindow;
-}
+}*/
 
 void WindowsToolbar::setMediaPlayer(QWeakPointer<MediaPlayer> mediaPlayer)
 {
@@ -80,10 +84,8 @@ QWidget* WindowsToolbar::configPage()
 void WindowsToolbar::init()
 {
 	// Progress bar in the task bar
-	_taskbarButton = new QWinTaskbarButton(this);
-	QWindow *window = new QWindow();
-	window->setIcon(QIcon(":/windows-toolbar/mmmmp"));
-	_taskbarButton->setWindow(window);
+    //_taskbarButton->setWindow(_mainWindow->windowHandle());
+    _taskbarButton->setWindow(QGuiApplication::focusWindow());
 	_taskbarProgress = _taskbarButton->progress();
 
 	// Init visibility of progressBar in the taskBar
@@ -103,7 +105,7 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 {
 	if (visible) {
 		_thumbbar = new QWinThumbnailToolBar(this);
-		_thumbbar->setWindow(_mainWindow->windowHandle());
+        _thumbbar->setWindow(QGuiApplication::focusWindow());
 
 		// Four buttons are enough
 		_skipBackward = new QWinThumbnailToolButton(_thumbbar);
