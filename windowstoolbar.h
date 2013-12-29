@@ -1,18 +1,23 @@
 #ifndef WINDOWSTOOLBAR_H
 #define WINDOWSTOOLBAR_H
 
+#include <QtWinExtras>
+
+#include "miamcore_global.h"
+#include "mediaplayer.h"
 #include "mediaplayerplugininterface.h"
+#include "settings.h"
 
 #include "ui_config.h"
 
-#include <QtWinExtras>
-#include <QMainWindow>
-
-#include <settings.h>
-#include <mediaplayer.h>
-
-#include "miamcore_global.h"
-
+/**
+ * \brief       Plugin to enable Windows 7 Features
+ * \details     The WindowsToolbar class is a plugin for Windows only which enables Windows 7 features.
+ *      It shows a Progress Bar when reading files, Taskbar Buttons to control the media player, and the current cover in preview
+ * \author      Matthieu Bachelier
+ * \version     1.0
+ * \copyright   GNU General Public License v3
+ */
 class WindowsToolbar : public QObject, public MediaPlayerPluginInterface
 {
 	Q_OBJECT
@@ -37,7 +42,9 @@ private:
 	Settings *_settings;
 
 public:
-	WindowsToolbar();
+	explicit WindowsToolbar();
+
+	virtual ~WindowsToolbar();
 
     inline virtual QString name() const { return "WindowsToolBar"; }
 
@@ -55,7 +62,7 @@ private:
 
 private slots:
 	/** Update the cover when the current media in the player has changed. */
-	void updateCover();
+	void updateCover(const QMediaContent &media);
 
 	void updateOverlayIcon();
 

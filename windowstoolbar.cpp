@@ -1,21 +1,21 @@
 #include "windowstoolbar.h"
 
 #include <QFile>
+#include <QGuiApplication>
 #include <QLabel>
 #include <QLibrary>
 #include <QMediaContent>
+#include <QMediaPlayer>
 #include <QMediaPlaylist>
 #include <QWindow>
 
-#include <cover.h>
-#include <filehelper.h>
+#include "cover.h"
+//#include "filehelper.h"
 
 #include <QtDebug>
 
-#include <QGuiApplication>
-
 WindowsToolbar::WindowsToolbar()
-    : /*_mainWindow(NULL),*/ _skipBackward(NULL), _playPause(NULL), _stop(NULL), _skipForward(NULL),
+	: QObject(), _skipBackward(NULL), _playPause(NULL), _stop(NULL), _skipForward(NULL),
       _taskbarProgress(NULL), _thumbbar(NULL)
 {
 	_settings = Settings::getInstance();
@@ -28,14 +28,19 @@ WindowsToolbar::WindowsToolbar()
 	if (_settings->value("hasMediaPlayerButtonsInThumbnail").isNull()) {
 		_settings->setValue("hasMediaPlayerButtonsInThumbnail", true);
 	}
+	if (_settings->value("hasOverlayIcon").isNull()) {
+		_settings->setValue("hasOverlayIcon", false);
+	}
 
     _taskbarButton = new QWinTaskbarButton(this);
 }
 
-/*void WindowsToolbar::setMainWindow(QMainWindow *mainWindow)
+WindowsToolbar::~WindowsToolbar()
 {
-	_mainWindow = mainWindow;
-}*/
+	_taskbarButton->clearOverlayIcon();
+	_taskbarProgress->hide();
+	this->showThumbnailButtons(false);
+}
 
 void WindowsToolbar::setMediaPlayer(QWeakPointer<MediaPlayer> mediaPlayer)
 {
@@ -49,7 +54,7 @@ void WindowsToolbar::setMediaPlayer(QWeakPointer<MediaPlayer> mediaPlayer)
     connect(_mediaPlayer.data(), &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateOverlayIcon);
     connect(_mediaPlayer.data(), &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateThumbnailToolBar);
     connect(_mediaPlayer.data(), &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateProgressbarTaskbar);
-    connect(_mediaPlayer.data(), &QMediaPlayer::currentMediaChanged, this, &WindowsToolbar::updateCover);
+	connect(_mediaPlayer.data(), &QMediaPlayer::currentMediaChanged, this, &WindowsToolbar::updateCover);
 }
 
 QWidget* WindowsToolbar::configPage()
@@ -84,8 +89,7 @@ QWidget* WindowsToolbar::configPage()
 void WindowsToolbar::init()
 {
 	// Progress bar in the task bar
-    //_taskbarButton->setWindow(_mainWindow->windowHandle());
-    _taskbarButton->setWindow(QGuiApplication::focusWindow());
+	_taskbarButton->setWindow(QGuiApplication::topLevelWindows().first());
 	_taskbarProgress = _taskbarButton->progress();
 
 	// Init visibility of progressBar in the taskBar
@@ -105,7 +109,7 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 {
 	if (visible) {
 		_thumbbar = new QWinThumbnailToolBar(this);
-        _thumbbar->setWindow(QGuiApplication::focusWindow());
+		_thumbbar->setWindow(QGuiApplication::topLevelWindows().first());
 
 		// Four buttons are enough
 		_skipBackward = new QWinThumbnailToolButton(_thumbbar);
@@ -143,34 +147,40 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 }
 
 /** Update the cover when the current media in the player has changed. */
-void WindowsToolbar::updateCover()
+void WindowsToolbar::updateCover(const QMediaContent &media)
 {
-    /*FileHelper fh(_mediaPlayer->currentMedia());
-	Cover *cover = fh.extractCover();
-	if (cover) {
-		QPixmap p;
-		bool b = p.loadFromData(cover->byteArray(), cover->format());
-		if (b) {
-			qDebug() << "inner cover was loaded";
+	//QWindow *w = new QWindow();
+	//QtWin::taskbarAddTab(w);
+	//FileHelper fh(media);
+	//qDebug() << media.canonicalUrl().toLocalFile();
+	//Cover *cover = fh.extractCover();
+	//if (cover) {
+		//QPixmap p;
+		//bool b = p.loadFromData(cover->byteArray(), cover->format());
+		//if (b) {
+		//	qDebug() << "inner cover was loaded";
 
-			QWindow *window = new QWindow();
-			QWidget *w = QWidget::createWindowContainer(window, new QWidget());
-			QLayout *l = new QHBoxLayout(w);
-			QLabel *imageLabel = new QLabel(w);
-			imageLabel->setPixmap(p);
-			l->addWidget(imageLabel);
-			w->setLayout(l);
+			//QWindow *window = new QWindow();
+			//QWidget *w = QWidget::createWindowContainer(window, new QWidget());
+			//QWidget *w = new QWidget();
+			//QLayout *l = new QHBoxLayout(w);
+			//QLabel *imageLabel = new QLabel("Rofl", w);
+			//imageLabel->setPixmap(p);
+			//l->addWidget(imageLabel);
+			//w->setLayout(l);
 			//w->show();
-			_thumbbar->setWindow(window);
-		}
-	} else {
-		qDebug() << "we need to look at the current dir if " << _mediaPlayer->currentMedia().canonicalUrl().toLocalFile() << "has some picture";
-    }*/
+			//_thumbbar->setWindow(window);
+		//}
+	//} else {
+	//	qDebug() << "no inner cover";
+	//}
 }
 
 void WindowsToolbar::updateOverlayIcon()
 {
+
 	if (_settings->value("hasOverlayIcon").toBool()) {
+		qDebug() << (_stop == NULL);
         switch (_mediaPlayer.data()->state()) {
 		// Icons are inverted from updateThumbnailToolBar() method because it's reflecting the actual state of the player
 		case QMediaPlayer::PlayingState:
@@ -180,10 +190,10 @@ void WindowsToolbar::updateOverlayIcon()
 			_taskbarButton->setOverlayIcon(QIcon(":/player/" + _settings->theme() + "/pause"));
 			break;
 		case QMediaPlayer::StoppedState:
-			_taskbarButton->setOverlayIcon(_stop->icon());
+			_taskbarButton->setOverlayIcon(QIcon(":/player/" + _settings->theme() + "/stop"));
 			break;
 		}
-	} else {
+	} else if (!_taskbarButton->overlayIcon().isNull()) {
 		_taskbarButton->clearOverlayIcon();
 	}
 }

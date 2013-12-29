@@ -4,16 +4,18 @@
 #include <QString>
 #include <QtPlugin>
 
-class BasicPluginInterface
+#include "miamcore_global.h"
+
+class MIAMCORE_LIBRARY BasicPluginInterface
 {
 public:
-    virtual ~BasicPluginInterface() {}
+	virtual ~BasicPluginInterface() {}
 
-    virtual QString name() const = 0;
+	virtual QString name() const = 0;
 
-    virtual QString version() const = 0;
+	virtual QString version() const = 0;
 
-    virtual QWidget* configPage() = 0;
+	virtual QWidget* configPage() = 0;
 };
 
 QT_BEGIN_NAMESPACE

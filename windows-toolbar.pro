@@ -1,29 +1,35 @@
 QT      += gui widgets multimedia winextras
 
-QMAKE_CXXFLAGS += -std=c++11
-
 TARGET   = $$qtLibraryTarget(windows-toolbar)
 TEMPLATE = lib
-CONFIG  += plugin
+
+MiamPlayerBuildDirectory = C:\dev\Madame-Miam-Miam-Music-Player\build\MiamPlayer
+
+DEFINES += MIAM_PLUGIN
+
+CONFIG  += dll c++11
 CONFIG(debug, debug|release) {
-    LIBS += -debug -lMiamCore
+    target.path = $$MiamPlayerBuildDirectory\debug\plugins
+    LIBS += -Ldebug -lMiamCore
 }
 
 CONFIG(release, debug|release) {
+    target.path = $$MiamPlayerBuildDirectory\release\plugins
     LIBS += -Lrelease -lMiamCore
 }
 
-HEADERS += windowstoolbar.h \
-    basicplugininterface.h \
-    mediaplayerplugininterface.h \
-    settings.h \
-    filehelper.h \
-    miamcore_global.h \
+INSTALLS += target
+
+HEADERS += basicplugininterface.h \
     cover.h \
-    mediaplayer.h
+    filehelper.h \
+    mediaplayer.h \
+    mediaplayerplugininterface.h \
+    miamcore_global.h \
+    settings.h \
+    windowstoolbar.h
 
 SOURCES += windowstoolbar.cpp
-
 
 FORMS += config.ui
 
