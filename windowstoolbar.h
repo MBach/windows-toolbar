@@ -46,15 +46,17 @@ public:
 
 	virtual ~WindowsToolbar();
 
-    inline virtual QString name() const { return "WindowsToolBar"; }
+	virtual QWidget *configPage();
 
-    inline virtual QString version() const { return "1.0"; }
+	inline virtual bool isConfigurable() const { return true; }
 
-    inline virtual bool providesView() const { return false; }
+	inline virtual QString name() const { return "WindowsToolBar"; }
 
-    virtual QWidget *configPage();
+	inline virtual bool providesView() const { return false; }
 
     virtual void setMediaPlayer(QWeakPointer<MediaPlayer>);
+
+	inline virtual QString version() const { return "1.0"; }
 
 private:
 	void init();
