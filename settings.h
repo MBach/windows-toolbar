@@ -1,6 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include <QFileInfo>
 #include <QPushButton>
 #include <QSettings>
 
@@ -35,11 +36,12 @@ private:
 public:
 	enum FontFamily{PLAYLIST, LIBRARY, MENUS};
 
+	enum PlaylistDefaultAction{AskUserForAction	= 0,
+							   SaveOnClose		= 1,
+							   DiscardOnClose	= 2};
+
 	/** Singleton Pattern to easily use Settings everywhere in the app. */
 	static Settings* getInstance();
-
-	/** Returns the size of the buffer for a cover. */
-	int bufferedCoverSize() const;
 
 	/** Returns the actual size of media buttons. */
 	int buttonsSize() const;
@@ -88,7 +90,12 @@ public:
 
 	/// PlayBack options
 	qint64 playbackSeekTime() const;
+
+	PlaylistDefaultAction playbackDefaultActionForClose() const;
+
 	bool playbackKeepPlaylists() const;
+
+	bool playbackRestorePlaylistsAtStartup() const;
 
 	QByteArray restoreColumnStateForPlaylist(int playlistIndex) const;
 
@@ -116,9 +123,6 @@ public:
 
 public slots:
 
-	/** Sets the size of the buffer for a cover. */
-	void setBufferedCoverSize(int i);
-
 	/** Sets a new button size. */
 	void setButtonsSize(const int &s);
 	void setButtonsFlat(bool b);
@@ -129,6 +133,7 @@ public slots:
 	void setCopyTracksFromPlaylist(bool b);
 
 	void setCovers(bool b);
+	void setCoverSize(int s);
 
 	void setCustomColors(bool b);
 
@@ -151,7 +156,9 @@ public slots:
 
 	/// PlayBack options
 	void setPlaybackSeekTime(int t);
+	void setPlaybackDefaultActionForClose(PlaylistDefaultAction action);
 	void setPlaybackKeepPlaylists(bool b);
+	void setPlaybackRestorePlaylistsAtStartup(bool b);
 
 	/** Sets a new theme. */
 	void setThemeName(const QString &theme);
