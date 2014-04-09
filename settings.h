@@ -32,6 +32,7 @@ private:
 	QMap<QString, QVariant> columnStates;
 
 	Q_ENUMS(FontFamily)
+	Q_ENUMS(PlaylistDefaultAction)
 
 public:
 	enum FontFamily{PLAYLIST, LIBRARY, MENUS};
@@ -42,6 +43,8 @@ public:
 
 	/** Singleton Pattern to easily use Settings everywhere in the app. */
 	static Settings* getInstance();
+
+	qreal bigCoverOpacity() const;
 
 	/** Returns the actual size of media buttons. */
 	int buttonsSize() const;
@@ -57,6 +60,8 @@ public:
 	/** Returns the size of a cover. */
 	int coverSize() const;
 
+	QColor customColors(QPalette::ColorRole cr) const;
+
 	/** Custom icons in CustomizeTheme */
 	const QString customIcon(QPushButton *, bool toggled = false) const;
 
@@ -70,6 +75,9 @@ public:
 
 	/** Custom icons in CustomizeTheme */
 	bool hasCustomIcon(QPushButton *) const;
+
+	/** Returns true if big and faded covers are displayed in the library when an album is expanded. */
+	bool isBigCoverEnabled() const;
 
 	/** Returns true if covers are displayed in the library. */
 	bool isCoversEnabled() const;
@@ -101,6 +109,8 @@ public:
 
 	void saveColumnStateForPlaylist(int playlistIndex, const QByteArray &state);
 
+	void setCustomColorRole(QPalette::ColorRole cr, const QColor &color);
+
 	/** Custom icons in CustomizeTheme */
 	void setCustomIcon(QPushButton *, const QString &buttonName);
 
@@ -123,6 +133,10 @@ public:
 
 public slots:
 
+	void setBigCoverOpacity(int v);
+
+	void setBigCovers(bool b);
+
 	/** Sets a new button size. */
 	void setButtonsSize(const int &s);
 	void setButtonsFlat(bool b);
@@ -136,9 +150,6 @@ public slots:
 	void setCoverSize(int s);
 
 	void setCustomColors(bool b);
-
-	/// StyleSheets
-	void setCustomStyleSheet(QWidget *w);
 
 	/** Sets if stars are visible and active. */
 	void setDelegates(const bool &value);
@@ -168,6 +179,10 @@ public slots:
 
 signals:
 	void themeHasChanged();
+
+	void fontHasChanged(const FontFamily &fontFamily, const QFont &font);
 };
+
+Q_DECLARE_METATYPE(QPalette::ColorRole)
 
 #endif // SETTINGS_H
