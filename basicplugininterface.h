@@ -2,6 +2,7 @@
 #define BASICPLUGININTERFACE_H
 
 #include <QString>
+#include <QTranslator>
 #include <QtPlugin>
 
 #include "miamcore_global.h"
@@ -9,15 +10,17 @@
 class MIAMCORE_LIBRARY BasicPluginInterface
 {
 public:
-	virtual ~BasicPluginInterface() {}
+    QTranslator translator;
 
-	virtual QWidget* configPage() = 0;
+    virtual ~BasicPluginInterface() {}
 
-	virtual bool isConfigurable() const = 0;
+    virtual QWidget* configPage() = 0;
 
-	virtual QString name() const = 0;
+    virtual bool isConfigurable() const = 0;
 
-	virtual QString version() const = 0;
+    virtual QString name() const = 0;
+
+    virtual QString version() const = 0;
 };
 
 QT_BEGIN_NAMESPACE

@@ -1,5 +1,6 @@
 <RCC>
-    <qresource prefix="/windows-toolbar">
-        <file alias="mmmmp">mmmmp.jpg</file>
+    <qresource prefix="/">
+        <file>translations/WindowsToolBar_en.qm</file>
+        <file>translations/WindowsToolBar_fr.qm</file>
     </qresource>
 </RCC>

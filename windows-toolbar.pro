@@ -3,7 +3,7 @@ QT      += gui widgets multimedia winextras
 TARGET   = $$qtLibraryTarget(windows-toolbar)
 TEMPLATE = lib
 
-MiamPlayerBuildDirectory = C:\dev\Madame-Miam-Miam-Music-Player\build\MiamPlayer
+MiamPlayerBuildDirectory = C:\dev\Miam-Player-build-x64\MiamPlayer
 
 DEFINES += MIAM_PLUGIN
 
@@ -35,3 +35,18 @@ FORMS += config.ui
 
 RESOURCES += \
     resources.qrc
+
+TRANSLATIONS += translations/WindowsToolBar_ar.ts \
+    translations/WindowsToolBar_cs.ts \
+    translations/WindowsToolBar_de.ts \
+    translations/WindowsToolBar_en.ts \
+    translations/WindowsToolBar_es.ts \
+    translations/WindowsToolBar_fr.ts \
+    translations/WindowsToolBar_it.ts \
+    translations/WindowsToolBar_ja.ts \
+    translations/WindowsToolBar_kr.ts \
+    translations/WindowsToolBar_pt.ts \
+    translations/WindowsToolBar_ru.ts \
+    translations/WindowsToolBar_th.ts \
+    translations/WindowsToolBar_vn.ts \
+    translations/WindowsToolBar_zh.ts
