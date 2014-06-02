@@ -64,7 +64,7 @@ private:
 
 private slots:
 	/** Update the cover when the current media in the player has changed. */
-	void updateCover(const QMediaContent &media);
+	void updateCover(const QMediaContent &);
 
 	void updateOverlayIcon();
 

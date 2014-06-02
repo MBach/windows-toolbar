@@ -91,6 +91,17 @@ void WindowsToolbar::init()
 	_taskbarButton->setWindow(QGuiApplication::topLevelWindows().first());
 	_taskbarProgress = _taskbarButton->progress();
 
+	// If one has switched to another view (like a plugin which brings a new view mode), reroute these buttons
+	connect(_taskbarButton->window(), &QWindow::activeChanged, this, [=](){
+		foreach (QWindow *w, QGuiApplication::topLevelWindows()) {
+			if (w->isVisible()) {
+				_taskbarButton->setWindow(w);
+				_thumbbar->setWindow(w);
+				break;
+			}
+		}
+	});
+
 	// Init visibility of progressBar in the taskBar
 	_taskbarProgress->setVisible(_settings->value("WindowsToolbar/hasProgressBarInTaskbar").toBool());
 
@@ -98,7 +109,6 @@ void WindowsToolbar::init()
 	this->updateOverlayIcon();
 
 	// Init visibility of progressBar in the thumbnail
-	//this->show
 
 	// Init visibility of media buttons
 	this->showThumbnailButtons(_settings->value("WindowsToolbar/hasMediaPlayerButtonsInThumbnail").toBool());
@@ -146,38 +156,13 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 }
 
 /** Update the cover when the current media in the player has changed. */
-void WindowsToolbar::updateCover(const QMediaContent &media)
+void WindowsToolbar::updateCover(const QMediaContent &)
 {
-	//QWindow *w = new QWindow();
-	//QtWin::taskbarAddTab(w);
-	//FileHelper fh(media);
-	//qDebug() << media.canonicalUrl().toLocalFile();
-	//Cover *cover = fh.extractCover();
-	//if (cover) {
-		//QPixmap p;
-		//bool b = p.loadFromData(cover->byteArray(), cover->format());
-		//if (b) {
-		//	qDebug() << "inner cover was loaded";
-
-			//QWindow *window = new QWindow();
-			//QWidget *w = QWidget::createWindowContainer(window, new QWidget());
-			//QWidget *w = new QWidget();
-			//QLayout *l = new QHBoxLayout(w);
-			//QLabel *imageLabel = new QLabel("Rofl", w);
-			//imageLabel->setPixmap(p);
-			//l->addWidget(imageLabel);
-			//w->setLayout(l);
-			//w->show();
-			//_thumbbar->setWindow(window);
-		//}
-	//} else {
-	//	qDebug() << "no inner cover";
-	//}
+	/// TODO Qt 5.4
 }
 
 void WindowsToolbar::updateOverlayIcon()
 {
-
 	if (_settings->value("WindowsToolbar/hasOverlayIcon").toBool()) {
 		qDebug() << (_stop == NULL);
 		switch (_mediaPlayer.data()->state()) {
