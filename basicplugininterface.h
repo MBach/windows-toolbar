@@ -10,17 +10,17 @@
 class MIAMCORE_LIBRARY BasicPluginInterface
 {
 public:
-    QTranslator translator;
+	QTranslator translator;
 
-    virtual ~BasicPluginInterface() {}
+	virtual ~BasicPluginInterface() {}
 
-    virtual QWidget* configPage() = 0;
+	virtual QWidget* configPage() = 0;
 
-    virtual bool isConfigurable() const = 0;
+	virtual bool isConfigurable() const = 0;
 
-    virtual QString name() const = 0;
+	virtual QString name() const = 0;
 
-    virtual QString version() const = 0;
+	virtual QString version() const = 0;
 };
 
 QT_BEGIN_NAMESPACE

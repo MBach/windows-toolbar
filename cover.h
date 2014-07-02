@@ -2,9 +2,16 @@
 #define COVER_H
 
 #include <QString>
+#include <QUrl>
 
 #include "miamcore_global.h"
 
+/**
+ * \brief		The Cover class
+ * \details
+ * \author      Matthieu Bachelier
+ * \copyright   GNU General Public License v3
+ */
 class MIAMCORE_LIBRARY Cover
 {
 private:
@@ -19,12 +26,12 @@ private:
 	bool _hasChanged;
 
 public:
-	Cover(const QByteArray &byteArray, const QString &mimeType);
+	Cover(const QByteArray &byteArray, const QString &mimeType = QString());
 
 	/** Constructor used when loading pictures directly from the filesystem (drag & drop or with the context menu). */
-	Cover(const QString &fileName = QString());
+	Cover(const QString &fileName);
 
-	inline const char* mimeType() const { return _mimeType.toStdString().data(); }
+	inline std::string mimeType() const { return _mimeType.toStdString(); }
 
 	inline const QByteArray byteArray() const { return _data; }
 

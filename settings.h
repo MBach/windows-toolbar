@@ -36,7 +36,7 @@ private:
 	Q_ENUMS(DragDropAction)
 
 public:
-	enum FontFamily{PLAYLIST, LIBRARY, MENUS};
+	enum FontFamily{FF_Playlist, FF_Library, FF_Menu};
 
 	enum PlaylistDefaultAction{PL_AskUserForAction	= 0,
 							   PL_SaveOnClose		= 1,
@@ -68,7 +68,7 @@ public:
 	QColor customColors(QPalette::ColorRole cr) const;
 
 	/** Custom icons in CustomizeTheme */
-	const QString customIcon(QPushButton *, bool toggled = false) const;
+	const QString customIcon(const QString &buttonName) const;
 
 	DragDropAction dragDropAction() const;
 
@@ -79,7 +79,7 @@ public:
 	int fontSize(const FontFamily fontFamily);
 
 	/** Custom icons in CustomizeTheme */
-	bool hasCustomIcon(QPushButton *) const;
+	bool hasCustomIcon(const QString &buttonName) const;
 
 	/** Returns true if big and faded covers are displayed in the library when an album is expanded. */
 	bool isBigCoverEnabled() const;
@@ -89,6 +89,8 @@ public:
 
 	bool isCustomColors() const;
 
+	bool isLibraryFilteredByArticles() const;
+
 	/** Returns true if the button in parameter is visible or not. */
 	bool isMediaButtonVisible(const QString & buttonName) const;
 
@@ -97,14 +99,21 @@ public:
 	/** Returns true if tabs should be displayed like rectangles. */
 	bool isRectTabs() const;
 
+	bool isSearchAndExcludeLibrary() const;
+
 	/** Returns true if stars are visible and active. */
 	bool isStarDelegates() const;
+
+	/** Returns true if a user has modified one of defaults theme. */
+	bool isThemeCustomized() const;
 
 	/** Returns true if the volume value in percent is always visible in the upper left corner of the widget. */
 	bool isVolumeBarTextAlwaysVisible() const;
 
 	/** Returns the language of the application. */
 	QString language();
+
+	QStringList libraryFilteredByArticles() const;
 
 	/** Returns all music locations. */
 	QStringList musicLocations() const;
@@ -127,16 +136,16 @@ public:
 	void setCustomColorRole(QPalette::ColorRole cr, const QColor &color);
 
 	/** Custom icons in CustomizeTheme */
-	void setCustomIcon(QPushButton *, const QString &buttonName);
+	void setCustomIcon(const QString &buttonName, const QString &iconPath);
 
 	/** Sets the language of the application. */
 	void setLanguage(const QString &lang);
 
 	void setMusicLocations(const QStringList &locations);
 
-	void setShortcut(const QString &objectName, int keySequence);
+	void setShortcut(const QString &objectName, const QKeySequence &keySequence);
 
-	int shortcut(const QString &objectName) const;
+	QKeySequence shortcut(const QString &objectName) const;
 
 	QMap<QString, QVariant> shortcuts() const;
 
@@ -149,7 +158,6 @@ public:
 	int volumeBarHideAfter() const;
 
 public slots:
-
 	void setBigCoverOpacity(int v);
 
 	void setBigCovers(bool b);
@@ -179,6 +187,10 @@ public slots:
 	/** Sets the font size of a part of the application. */
 	void setFontPointSize(const FontFamily &fontFamily, int i);
 
+	void setIsLibraryFilteredByArticles(bool b);
+
+	void setLibraryFilteredByArticles(const QStringList &tagList);
+
 	/** Sets if the button in parameter is visible or not. */
 	void setMediaButtonVisible(const QString & buttonName, const bool &value);
 
@@ -188,9 +200,13 @@ public slots:
 	void setPlaybackKeepPlaylists(bool b);
 	void setPlaybackRestorePlaylistsAtStartup(bool b);
 
+	void setSearchAndExcludeLibrary(bool b);
+
 	void setTabsOverlappingLength(int l);
 
 	void setTabsRect(bool b);
+
+	void setThemeCustomized(bool b);
 
 	/** Sets a new theme. */
 	void setThemeName(const QString &theme);
