@@ -45,15 +45,15 @@ void WindowsToolbar::setMediaPlayer(QWeakPointer<MediaPlayer> mediaPlayer)
 {
 	_mediaPlayer = mediaPlayer;
 	this->init();
-	connect(_mediaPlayer.data(), &QMediaPlayer::positionChanged, [=] (qint64 pos) {
+	connect(_mediaPlayer.data(), &MediaPlayer::positionChanged, [=] (qint64 pos) {
 		if (_mediaPlayer.data()->duration() > 0) {
 			_taskbarProgress->setValue(100 * pos / _mediaPlayer.data()->duration());
 		}
 	});
-	connect(_mediaPlayer.data(), &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateOverlayIcon);
-	connect(_mediaPlayer.data(), &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateThumbnailToolBar);
-	connect(_mediaPlayer.data(), &QMediaPlayer::stateChanged, this, &WindowsToolbar::updateProgressbarTaskbar);
-	connect(_mediaPlayer.data(), &QMediaPlayer::currentMediaChanged, this, &WindowsToolbar::updateCover);
+	connect(_mediaPlayer.data(), &MediaPlayer::stateChanged, this, &WindowsToolbar::updateOverlayIcon);
+	connect(_mediaPlayer.data(), &MediaPlayer::stateChanged, this, &WindowsToolbar::updateThumbnailToolBar);
+	connect(_mediaPlayer.data(), &MediaPlayer::stateChanged, this, &WindowsToolbar::updateProgressbarTaskbar);
+	connect(_mediaPlayer.data(), &MediaPlayer::currentMediaChanged, this, &WindowsToolbar::updateCover);
 }
 
 QWidget* WindowsToolbar::configPage()
@@ -139,14 +139,14 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 		// Connect each buttons to the main program
 		connect(_skipBackward, &QWinThumbnailToolButton::clicked, _mediaPlayer.data(), &MediaPlayer::skipBackward);
 		connect(_skipForward, &QWinThumbnailToolButton::clicked, _mediaPlayer.data(), &MediaPlayer::skipForward);
-		connect(_playPause, &QWinThumbnailToolButton::clicked, [=]() {
+		connect(_playPause, &QWinThumbnailToolButton::clicked, this, [=]() {
 			if (_mediaPlayer.data()->state() == QMediaPlayer::PlayingState) {
 				_mediaPlayer.data()->pause();
 			} else {
 				_mediaPlayer.data()->play();
 			}
 		});
-		connect(_stop, &QWinThumbnailToolButton::clicked, _mediaPlayer.data(), &QMediaPlayer::stop);
+		connect(_stop, &QWinThumbnailToolButton::clicked, _mediaPlayer.data(), &MediaPlayer::stop);
 	} else if (_thumbbar) {
 		///XXX the thumbnail window is not resizing properly when removing buttons?
 		_thumbbar->clear();
