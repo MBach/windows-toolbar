@@ -20,11 +20,11 @@ CONFIG(release, debug|release) {
 
 INSTALLS += target
 
-HEADERS += basicplugininterface.h \
+HEADERS += basicplugin.h \
     cover.h \
     filehelper.h \
     mediaplayer.h \
-    mediaplayerplugininterface.h \
+    mediaplayerplugin.h \
     miamcore_global.h \
     settings.h \
     windowstoolbar.h

@@ -5,7 +5,7 @@
 
 #include "miamcore_global.h"
 #include "mediaplayer.h"
-#include "mediaplayerplugininterface.h"
+#include "mediaplayerplugin.h"
 #include "settings.h"
 
 #include "ui_config.h"
@@ -18,11 +18,11 @@
  * \version     1.0
  * \copyright   GNU General Public License v3
  */
-class WindowsToolbar : public QObject, public MediaPlayerPluginInterface
+class WindowsToolbar : public QObject, public MediaPlayerPlugin
 {
 	Q_OBJECT
-	Q_PLUGIN_METADATA(IID MediaPlayerPluginInterface_iid)
-	Q_INTERFACES(MediaPlayerPluginInterface)
+	Q_PLUGIN_METADATA(IID MediaPlayerPlugin_iid)
+	Q_INTERFACES(MediaPlayerPlugin)
 
 private:
 	Ui::ConfigForm _ui;
