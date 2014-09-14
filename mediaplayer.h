@@ -2,48 +2,66 @@
 #define MEDIAPLAYER_H
 
 #include <QMediaPlayer>
+#include <QMediaPlaylist>
 
 #include "miamcore_global.h"
+
+class RemoteMediaPlayer;
 
 class VlcInstance;
 class VlcMedia;
 class VlcMediaPlayer;
 struct libvlc_media_t;
 
-#include <QMediaPlaylist>
-
+/**
+ * \brief The MediaPlayer class is a central class which controls local and remote sources.
+ * \details
+ * \author      Matthieu Bachelier
+ * \copyright   GNU General Public License v3
+ */
 class MIAMCORE_LIBRARY MediaPlayer : public QObject
 {
 	Q_OBJECT
 private:
+	QMediaPlaylist *_playlist;
+	QMediaPlayer::State _state;
+
 	VlcInstance *_instance;
 	VlcMedia *_media;
 	VlcMediaPlayer *_player;
 
-	QMediaPlaylist *_playlist;
-
-	QMediaPlayer::State _state;
+	QMap<QString, RemoteMediaPlayer*> _remotePlayers;
 
 public:
 	explicit MediaPlayer(QObject *parent = 0);
 
-	QMediaPlaylist * playlist();
+	void addRemotePlayer(RemoteMediaPlayer *remotePlayer);
 
+	QMediaPlaylist * playlist();
 	void setPlaylist(QMediaPlaylist *playlist);
 
 	void setVolume(int v);
+	int volume() const;
 
 	qint64 duration();
 
 	QMediaPlayer::State state() const;
+	void setState(QMediaPlayer::State state);
 
 	void setMute(bool b) const;
 
-	void setPosition(float pos);
+	void seek(float pos);
 
-	int volume() const;
+private:
+	void createLocalConnections();
 
 public slots:
+	/** Pause current playing track. */
+	void pause();
+
+	/** Play current track in the playlist. */
+	void play();
+
 	/** Seek backward in the current playing track for a small amount of time. */
 	void seekBackward();
 
@@ -56,19 +74,23 @@ public slots:
 	/** Change the current track. */
 	void skipForward();
 
-	void pause();
-	void play();
+	/** Stop current track in the playlist. */
 	void stop();
 
+	/** Activate or desactive audio output. */
 	void toggleMute() const;
+
+protected:
+	RemoteMediaPlayer * remoteMediaPlayer(const QUrl &track, bool autoConnect = true);
 
 private slots:
 	void convertMedia(libvlc_media_t *);
+	void disconnectPlayers(bool isLocal);
 
 signals:
 	void currentMediaChanged(const QMediaContent &);
 	void mediaStatusChanged(QMediaPlayer::MediaStatus);
-	void positionChanged(qint64 pos);
+	void positionChanged(qint64 pos, qint64 duration);
 	void stateChanged(QMediaPlayer::State);
 };
 
