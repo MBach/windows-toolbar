@@ -45,9 +45,9 @@ void WindowsToolbar::setMediaPlayer(QWeakPointer<MediaPlayer> mediaPlayer)
 {
 	_mediaPlayer = mediaPlayer;
 	this->init();
-	connect(_mediaPlayer.data(), &MediaPlayer::positionChanged, [=] (qint64 pos) {
-		if (_mediaPlayer.data()->duration() > 0) {
-			_taskbarProgress->setValue(100 * pos / _mediaPlayer.data()->duration());
+	connect(_mediaPlayer.data(), &MediaPlayer::positionChanged, [=] (qint64 pos, qint64 duration) {
+		if (duration > 0) {
+			_taskbarProgress->setValue(100 * pos / duration);
 		}
 	});
 	connect(_mediaPlayer.data(), &MediaPlayer::stateChanged, this, &WindowsToolbar::updateOverlayIcon);
