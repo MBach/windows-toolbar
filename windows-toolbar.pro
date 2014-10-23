@@ -1,4 +1,4 @@
-QT      += gui widgets multimedia winextras
+QT      += gui widgets multimedia sql winextras
 
 TARGET   = $$qtLibraryTarget(windows-toolbar)
 TEMPLATE = lib
@@ -20,11 +20,17 @@ CONFIG(release, debug|release) {
 
 INSTALLS += target
 
-HEADERS += basicplugin.h \
+HEADERS += interfaces/basicplugin.h \
+    interfaces/mediaplayerplugin.h \
+    model/albumdao.h \
+    model/artistdao.h \
+    model/genericdao.h \
+    model/playlistdao.h \
+    model/sqldatabase.h \
+    model/trackdao.h \
     cover.h \
     filehelper.h \
     mediaplayer.h \
-    mediaplayerplugin.h \
     miamcore_global.h \
     settings.h \
     windowstoolbar.h

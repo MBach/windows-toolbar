@@ -4,8 +4,9 @@
 #include <QtWinExtras>
 
 #include "miamcore_global.h"
+#include "interfaces/mediaplayerplugin.h"
+#include "model/trackdao.h"
 #include "mediaplayer.h"
-#include "mediaplayerplugin.h"
 #include "settings.h"
 
 #include "ui_config.h"
@@ -64,7 +65,7 @@ private:
 
 private slots:
 	/** Update the cover when the current media in the player has changed. */
-	void updateCover(const QMediaContent &);
+	void updateCover(const QString &uri);
 
 	void updateOverlayIcon();
 

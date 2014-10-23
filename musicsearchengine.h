@@ -3,12 +3,15 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QFileSystemWatcher>
 
 #include "miamcore_global.h"
 
 class MIAMCORE_LIBRARY MusicSearchEngine : public QObject
 {
 	Q_OBJECT
+private:
+	QFileSystemWatcher *_watcher;
 
 public:
 	MusicSearchEngine(QObject *parent = 0);
@@ -17,11 +20,10 @@ public slots:
 	void doSearch();
 
 signals:
-	/** A Jpeg or a PNG was found in observed directories. */
-	///FIXME: however, it's not proven this file belongs to a well formed music directory like "<REP> -> Tracks + Cover.JPG"
-	void scannedCover(const QString &);
+	/** A JPG or a PNG was found next to a valid audio file in the same directory. */
+	void scannedCover(const QString &, const QString &);
 
-	void scannedFiled(const QString &);
+	void scannedFile(const QString &);
 
 	void progressChanged(const int &);
 

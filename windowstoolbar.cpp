@@ -1,4 +1,5 @@
 #include "windowstoolbar.h"
+#include "model/sqldatabase.h"
 
 #include <QFile>
 #include <QGuiApplication>
@@ -17,7 +18,7 @@ WindowsToolbar::WindowsToolbar()
 	: QObject(), _skipBackward(NULL), _playPause(NULL), _stop(NULL), _skipForward(NULL),
 	  _taskbarProgress(NULL), _thumbbar(NULL)
 {
-	_settings = Settings::getInstance();
+	_settings = Settings::instance();
 	connect(_settings, &Settings::themeHasChanged, this, &WindowsToolbar::updateThumbnailToolBar);
 
 	// First time (ever) the plugin is loaded
@@ -118,6 +119,13 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 {
 	if (visible) {
 		_thumbbar = new QWinThumbnailToolBar(this);
+		/*_thumbbar->setIconicPixmapNotificationsEnabled(true);
+		connect(_thumbbar, &QWinThumbnailToolBar::iconicThumbnailPixmapRequested, this, [=]() {
+			qDebug() << "iconicThumbnailPixmapRequested";
+		});
+		connect(_thumbbar, &QWinThumbnailToolBar::iconicLivePreviewPixmapRequested, this, [=]() {
+			qDebug() << "iconicLivePreviewPixmapRequested";
+		});*/
 		_thumbbar->setWindow(QGuiApplication::topLevelWindows().first());
 
 		// Four buttons are enough
@@ -156,9 +164,19 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 }
 
 /** Update the cover when the current media in the player has changed. */
-void WindowsToolbar::updateCover(const QMediaContent &)
+void WindowsToolbar::updateCover(const QString &uri)
 {
-	/// TODO Qt 5.4
+	qDebug() << Q_FUNC_INFO << uri;
+	SqlDatabase *db = SqlDatabase::instance();
+	Cover *c = db->selectCoverFromURI(uri);
+	if (c) {
+		QPixmap p = QPixmap::fromImage(QImage::fromData(c->byteArray(), c->format()));
+		_thumbbar->setIconicThumbnailPixmap(p);
+		delete c;
+	} else {
+		_thumbbar->setIconicThumbnailPixmap(QPixmap());
+	}
+	_thumbbar->setIconicLivePreviewPixmap(QPixmap());
 }
 
 void WindowsToolbar::updateOverlayIcon()
