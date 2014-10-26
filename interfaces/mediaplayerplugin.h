@@ -2,7 +2,7 @@
 #define MEDIAPLAYERPLUGIN_H
 
 #include "basicplugin.h"
-#include "../mediaplayer.h"
+#include "mediaplayer.h"
 
 class MIAMCORE_LIBRARY MediaPlayerPlugin : public BasicPlugin
 {

@@ -109,8 +109,6 @@ void WindowsToolbar::init()
 	// Init visibility of overlay icon
 	this->updateOverlayIcon();
 
-	// Init visibility of progressBar in the thumbnail
-
 	// Init visibility of media buttons
 	this->showThumbnailButtons(_settings->value("WindowsToolbar/hasMediaPlayerButtonsInThumbnail").toBool());
 }
@@ -176,7 +174,6 @@ void WindowsToolbar::updateCover(const QString &uri)
 	} else {
 		_thumbbar->setIconicThumbnailPixmap(QPixmap());
 	}
-	_thumbbar->setIconicLivePreviewPixmap(QPixmap());
 }
 
 void WindowsToolbar::updateOverlayIcon()
@@ -213,6 +210,7 @@ void WindowsToolbar::updateProgressbarTaskbar()
 		break;
 	case QMediaPlayer::StoppedState:
 		_taskbarProgress->hide();
+		_thumbbar->setIconicThumbnailPixmap(QPixmap(":/icons/mp_win32"));
 		break;
 	}
 }
