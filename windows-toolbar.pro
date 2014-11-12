@@ -28,6 +28,7 @@ HEADERS += interfaces/basicplugin.h \
     model/playlistdao.h \
     model/sqldatabase.h \
     model/trackdao.h \
+    model/yeardao.h \
     cover.h \
     filehelper.h \
     mediaplayer.h \

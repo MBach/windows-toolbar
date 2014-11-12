@@ -55,6 +55,7 @@ void WindowsToolbar::setMediaPlayer(QWeakPointer<MediaPlayer> mediaPlayer)
 	connect(_mediaPlayer.data(), &MediaPlayer::stateChanged, this, &WindowsToolbar::updateThumbnailToolBar);
 	connect(_mediaPlayer.data(), &MediaPlayer::stateChanged, this, &WindowsToolbar::updateProgressbarTaskbar);
 	connect(_mediaPlayer.data(), &MediaPlayer::currentMediaChanged, this, &WindowsToolbar::updateCover);
+	this->updateCover(QString());
 }
 
 QWidget* WindowsToolbar::configPage()
@@ -92,6 +93,41 @@ void WindowsToolbar::init()
 	_taskbarButton->setWindow(QGuiApplication::topLevelWindows().first());
 	_taskbarProgress = _taskbarButton->progress();
 
+	QApplication *app = static_cast<QApplication*>(QApplication::instance());
+	connect(app, &QApplication::focusChanged, this, [=]() {
+		if (QScreen *screen = QGuiApplication::primaryScreen()) {
+			if (QWindow *w = QApplication::topLevelWindows().first()) {
+				QPixmap originalPixmap = screen->grabWindow(w->winId());
+				_thumbbar->setIconicLivePreviewPixmap(originalPixmap);
+			}
+		}
+	});
+
+	SqlDatabase *db = SqlDatabase::instance();
+	connect(db, &SqlDatabase::aboutToLoad, this, [=]() {
+		if (_taskbarProgress->isVisible()) {
+			_mediaPlayer.data()->blockSignals(true);
+			_taskbarProgress->setProperty("previousVisible", true);
+			_taskbarProgress->setProperty("previousPausedState", _taskbarProgress->isPaused());
+			_taskbarProgress->setProperty("previousValue", _taskbarProgress->value());
+			_taskbarProgress->setValue(0);
+			_taskbarProgress->setPaused(false);
+		}
+	});
+	connect(db, &SqlDatabase::progressChanged, _taskbarProgress, &QWinTaskbarProgress::setValue);
+	connect(db, &SqlDatabase::loaded, this, [=]() {
+		_mediaPlayer.data()->blockSignals(false);
+		bool b = _taskbarProgress->property("previousVisible").toBool();
+		if (b) {
+			_taskbarProgress->setVisible(true);
+			_taskbarProgress->setPaused(_taskbarProgress->property("previousPausedState").toBool());
+			_taskbarProgress->setValue(_taskbarProgress->property("previousValue").toInt());
+		} else {
+			_taskbarProgress->setValue(0);
+			_taskbarProgress->hide();
+		}
+	});
+
 	// If one has switched to another view (like a plugin which brings a new view mode), reroute these buttons
 	connect(_taskbarButton->window(), &QWindow::activeChanged, this, [=](){
 		foreach (QWindow *w, QGuiApplication::topLevelWindows()) {
@@ -117,13 +153,15 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 {
 	if (visible) {
 		_thumbbar = new QWinThumbnailToolBar(this);
-		/*_thumbbar->setIconicPixmapNotificationsEnabled(true);
-		connect(_thumbbar, &QWinThumbnailToolBar::iconicThumbnailPixmapRequested, this, [=]() {
-			qDebug() << "iconicThumbnailPixmapRequested";
-		});
+		_thumbbar->setIconicPixmapNotificationsEnabled(true);
 		connect(_thumbbar, &QWinThumbnailToolBar::iconicLivePreviewPixmapRequested, this, [=]() {
 			qDebug() << "iconicLivePreviewPixmapRequested";
-		});*/
+			/*QScreen *screen = QGuiApplication::primaryScreen();
+			if (screen) {
+				QPixmap originalPixmap = screen->grabWindow(0);
+				_thumbbar->setIconicLivePreviewPixmap(originalPixmap);
+			}*/
+		});
 		_thumbbar->setWindow(QGuiApplication::topLevelWindows().first());
 
 		// Four buttons are enough
@@ -164,7 +202,6 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 /** Update the cover when the current media in the player has changed. */
 void WindowsToolbar::updateCover(const QString &uri)
 {
-	qDebug() << Q_FUNC_INFO << uri;
 	SqlDatabase *db = SqlDatabase::instance();
 	Cover *c = db->selectCoverFromURI(uri);
 	if (c) {
@@ -172,7 +209,7 @@ void WindowsToolbar::updateCover(const QString &uri)
 		_thumbbar->setIconicThumbnailPixmap(p);
 		delete c;
 	} else {
-		_thumbbar->setIconicThumbnailPixmap(QPixmap());
+		_thumbbar->setIconicThumbnailPixmap(QPixmap(":/icons/mp_win32"));
 	}
 }
 
