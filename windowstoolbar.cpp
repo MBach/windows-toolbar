@@ -95,6 +95,10 @@ void WindowsToolbar::init()
 
 	QApplication *app = static_cast<QApplication*>(QApplication::instance());
 	connect(app, &QApplication::focusChanged, this, [=]() {
+		// qDebug() << "focus changed";
+		if (!_thumbbar) {
+			return;
+		}
 		if (QScreen *screen = QGuiApplication::primaryScreen()) {
 			if (QWindow *w = QApplication::topLevelWindows().first()) {
 				QPixmap originalPixmap = screen->grabWindow(w->winId());
@@ -105,8 +109,8 @@ void WindowsToolbar::init()
 
 	SqlDatabase *db = SqlDatabase::instance();
 	connect(db, &SqlDatabase::aboutToLoad, this, [=]() {
-		if (_taskbarProgress->isVisible()) {
-			_mediaPlayer.data()->blockSignals(true);
+		_mediaPlayer.data()->blockSignals(true);
+		if (_mediaPlayer.data()->state() != QMediaPlayer::StoppedState) {
 			_taskbarProgress->setProperty("previousVisible", true);
 			_taskbarProgress->setProperty("previousPausedState", _taskbarProgress->isPaused());
 			_taskbarProgress->setProperty("previousValue", _taskbarProgress->value());
@@ -119,7 +123,7 @@ void WindowsToolbar::init()
 		_mediaPlayer.data()->blockSignals(false);
 		bool b = _taskbarProgress->property("previousVisible").toBool();
 		if (b) {
-			_taskbarProgress->setVisible(true);
+			_taskbarProgress->show();
 			_taskbarProgress->setPaused(_taskbarProgress->property("previousPausedState").toBool());
 			_taskbarProgress->setValue(_taskbarProgress->property("previousValue").toInt());
 		} else {
@@ -133,7 +137,9 @@ void WindowsToolbar::init()
 		foreach (QWindow *w, QGuiApplication::topLevelWindows()) {
 			if (w->isVisible()) {
 				_taskbarButton->setWindow(w);
-				_thumbbar->setWindow(w);
+				if (_thumbbar) {
+					_thumbbar->setWindow(w);
+				}
 				break;
 			}
 		}
@@ -202,6 +208,10 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 /** Update the cover when the current media in the player has changed. */
 void WindowsToolbar::updateCover(const QString &uri)
 {
+	if (!_thumbbar) {
+		return;
+	}
+
 	SqlDatabase *db = SqlDatabase::instance();
 	Cover *c = db->selectCoverFromURI(uri);
 	if (c) {
