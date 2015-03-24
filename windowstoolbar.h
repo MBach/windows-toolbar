@@ -49,6 +49,8 @@ public:
 
 	virtual QWidget *configPage();
 
+	inline virtual QStringList extensions() const { return QStringList(); }
+
 	inline virtual bool isConfigurable() const { return true; }
 
 	inline virtual QString name() const { return "WindowsToolBar"; }

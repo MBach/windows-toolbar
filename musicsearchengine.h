@@ -3,21 +3,17 @@
 
 #include <QDir>
 #include <QFileInfo>
-//#include <QFileSystemWatcher>
 
 #include "miamcore_global.h"
 
 class MIAMCORE_LIBRARY MusicSearchEngine : public QObject
 {
 	Q_OBJECT
-//private:
-//	QFileSystemWatcher *_watcher;
-
 public:
 	MusicSearchEngine(QObject *parent = 0);
 
 public slots:
-	void doSearch();
+	void doSearch(const QStringList &delta = QStringList());
 
 signals:
 	/** A JPG or a PNG was found next to a valid audio file in the same directory. */
