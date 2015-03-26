@@ -45,15 +45,16 @@ public:
 	/** Singleton pattern to be able to easily use settings everywhere in the app. */
 	static SqlDatabase* instance();
 
-	bool insertIntoTableArtists(const ArtistDAO &artist);
-	bool insertIntoTableAlbums(uint artistId, const AlbumDAO &album);
-	bool insertIntoTablePlaylistTracks(int playlistId, const std::list<TrackDAO> &tracks);
-	int  insertIntoTablePlaylists(const PlaylistDAO &playlist);
+	bool insertIntoTableArtists(ArtistDAO *artist);
+	bool insertIntoTableAlbums(uint artistId, AlbumDAO *album);
+	int  insertIntoTablePlaylists(const PlaylistDAO &playlist, const std::list<TrackDAO> &tracks, bool isOverwriting);
+	bool insertIntoTablePlaylistTracks(int playlistId, const std::list<TrackDAO> &tracks, bool isOverwriting = false);
 	bool insertIntoTableTracks(const TrackDAO &track);
 	bool insertIntoTableTracks(const std::list<TrackDAO> &tracks);
 
-	void removeRecordsFromHost(const QString &);
-	void removePlaylists(const QList<PlaylistDAO> &playlists);
+	void removeRecordsFromHost(const QString &host);
+	bool removePlaylists(const QList<PlaylistDAO> &playlists);
+	void removePlaylistsFromHost(const QString &host);
 
 	Cover *selectCoverFromURI(const QString &uri);
 	QList<TrackDAO> selectPlaylistTracks(int playlistID);
@@ -74,14 +75,16 @@ public:
 
 private:
 	/** Read all tracks entries in the database and send them to connected views. */
-	void loadFromFileDB();
+	void loadFromFileDB(bool sendResetSignal = true);
 
 public slots:
 	/** Load an existing database file or recreate it, if not found. */
 	void load();
 
-	/** Safe delete and recreate from scratch. */
+	/** Delete and rescan local tracks. */
 	void rebuild();
+
+	void rebuild(const QStringList &oldLocations, const QStringList &newLocations);
 
 private slots:
 	/** Reads an external picture which is close to multimedia files (same folder). */
@@ -92,6 +95,7 @@ private slots:
 
 signals:
 	void aboutToLoad();
+	void aboutToResyncRemoteSources();
 	void coverWasUpdated(const QFileInfo &);
 	void loaded();
 	void progressChanged(const int &);
