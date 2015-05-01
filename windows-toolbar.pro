@@ -32,6 +32,7 @@ HEADERS += interfaces/basicplugin.h \
     cover.h \
     filehelper.h \
     mediaplayer.h \
+    mediaplaylist.h \
     miamcore_global.h \
     settings.h \
     windowstoolbar.h
@@ -40,8 +41,7 @@ SOURCES += windowstoolbar.cpp
 
 FORMS += config.ui
 
-RESOURCES += \
-    resources.qrc
+RESOURCES += resources.qrc
 
 TRANSLATIONS += translations/WindowsToolBar_ar.ts \
     translations/WindowsToolBar_cs.ts \

@@ -42,19 +42,19 @@ WindowsToolbar::~WindowsToolbar()
 	this->showThumbnailButtons(false);
 }
 
-void WindowsToolbar::setMediaPlayer(QWeakPointer<MediaPlayer> mediaPlayer)
+void WindowsToolbar::setMediaPlayer(MediaPlayer *mediaPlayer)
 {
 	_mediaPlayer = mediaPlayer;
 	this->init();
-	connect(_mediaPlayer.data(), &MediaPlayer::positionChanged, [=] (qint64 pos, qint64 duration) {
+	connect(_mediaPlayer, &MediaPlayer::positionChanged, [=] (qint64 pos, qint64 duration) {
 		if (duration > 0) {
 			_taskbarProgress->setValue(100 * pos / duration);
 		}
 	});
-	connect(_mediaPlayer.data(), &MediaPlayer::stateChanged, this, &WindowsToolbar::updateOverlayIcon);
-	connect(_mediaPlayer.data(), &MediaPlayer::stateChanged, this, &WindowsToolbar::updateThumbnailToolBar);
-	connect(_mediaPlayer.data(), &MediaPlayer::stateChanged, this, &WindowsToolbar::updateProgressbarTaskbar);
-	connect(_mediaPlayer.data(), &MediaPlayer::currentMediaChanged, this, &WindowsToolbar::updateCover);
+	connect(_mediaPlayer, &MediaPlayer::stateChanged, this, &WindowsToolbar::updateOverlayIcon);
+	connect(_mediaPlayer, &MediaPlayer::stateChanged, this, &WindowsToolbar::updateThumbnailToolBar);
+	connect(_mediaPlayer, &MediaPlayer::stateChanged, this, &WindowsToolbar::updateProgressbarTaskbar);
+	connect(_mediaPlayer, &MediaPlayer::currentMediaChanged, this, &WindowsToolbar::updateCover);
 	this->updateCover(QString());
 }
 
@@ -109,8 +109,8 @@ void WindowsToolbar::init()
 
 	SqlDatabase *db = SqlDatabase::instance();
 	connect(db, &SqlDatabase::aboutToLoad, this, [=]() {
-		_mediaPlayer.data()->blockSignals(true);
-		if (_mediaPlayer.data()->state() != QMediaPlayer::StoppedState) {
+		_mediaPlayer->blockSignals(true);
+		if (_mediaPlayer->state() != QMediaPlayer::StoppedState) {
 			_taskbarProgress->setProperty("previousVisible", true);
 			_taskbarProgress->setProperty("previousPausedState", _taskbarProgress->isPaused());
 			_taskbarProgress->setProperty("previousValue", _taskbarProgress->value());
@@ -120,7 +120,7 @@ void WindowsToolbar::init()
 	});
 	connect(db, &SqlDatabase::progressChanged, _taskbarProgress, &QWinTaskbarProgress::setValue);
 	connect(db, &SqlDatabase::loaded, this, [=]() {
-		_mediaPlayer.data()->blockSignals(false);
+		_mediaPlayer->blockSignals(false);
 		bool b = _taskbarProgress->property("previousVisible").toBool();
 		if (b) {
 			_taskbarProgress->show();
@@ -134,7 +134,7 @@ void WindowsToolbar::init()
 
 	// If one has switched to another view (like a plugin which brings a new view mode), reroute these buttons
 	connect(_taskbarButton->window(), &QWindow::activeChanged, this, [=](){
-		foreach (QWindow *w, QGuiApplication::topLevelWindows()) {
+		for (QWindow *w : QGuiApplication::topLevelWindows()) {
 			if (w->isVisible()) {
 				_taskbarButton->setWindow(w);
 				if (_thumbbar) {
@@ -187,16 +187,16 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 		_skipForward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipForward"));
 
 		// Connect each buttons to the main program
-		connect(_skipBackward, &QWinThumbnailToolButton::clicked, _mediaPlayer.data(), &MediaPlayer::skipBackward);
-		connect(_skipForward, &QWinThumbnailToolButton::clicked, _mediaPlayer.data(), &MediaPlayer::skipForward);
+		connect(_skipBackward, &QWinThumbnailToolButton::clicked, _mediaPlayer, &MediaPlayer::skipBackward);
+		connect(_skipForward, &QWinThumbnailToolButton::clicked, _mediaPlayer, &MediaPlayer::skipForward);
 		connect(_playPause, &QWinThumbnailToolButton::clicked, this, [=]() {
-			if (_mediaPlayer.data()->state() == QMediaPlayer::PlayingState) {
-				_mediaPlayer.data()->pause();
+			if (_mediaPlayer->state() == QMediaPlayer::PlayingState) {
+				_mediaPlayer->pause();
 			} else {
-				_mediaPlayer.data()->play();
+				_mediaPlayer->play();
 			}
 		});
-		connect(_stop, &QWinThumbnailToolButton::clicked, _mediaPlayer.data(), &MediaPlayer::stop);
+		connect(_stop, &QWinThumbnailToolButton::clicked, _mediaPlayer, &MediaPlayer::stop);
 	} else if (_thumbbar) {
 		///XXX the thumbnail window is not resizing properly when removing buttons?
 		_thumbbar->clear();
@@ -227,7 +227,7 @@ void WindowsToolbar::updateOverlayIcon()
 {
 	if (_settings->value("WindowsToolbar/hasOverlayIcon").toBool()) {
 		qDebug() << (_stop == NULL);
-		switch (_mediaPlayer.data()->state()) {
+		switch (_mediaPlayer->state()) {
 		// Icons are inverted from updateThumbnailToolBar() method because it's reflecting the actual state of the player
 		case QMediaPlayer::PlayingState:
 			_taskbarButton->setOverlayIcon(QIcon(":/player/" + _settings->theme() + "/play"));
@@ -246,7 +246,7 @@ void WindowsToolbar::updateOverlayIcon()
 
 void WindowsToolbar::updateProgressbarTaskbar()
 {
-	switch (_mediaPlayer.data()->state()) {
+	switch (_mediaPlayer->state()) {
 	case QMediaPlayer::PlayingState:
 		_taskbarProgress->resume();
 		_taskbarProgress->setVisible(_settings->value("WindowsToolbar/hasProgressBarInTaskbar").toBool());
@@ -266,7 +266,7 @@ void WindowsToolbar::updateProgressbarTaskbar()
 void WindowsToolbar::updateThumbnailToolBar()
 {
 	_skipBackward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipBackward"));
-	if (_mediaPlayer.data()->state() == QMediaPlayer::PlayingState) {
+	if (_mediaPlayer->state() == QMediaPlayer::PlayingState) {
 		_playPause->setIcon(QIcon(":/player/" + _settings->theme() + "/pause"));
 	} else {
 		_playPause->setIcon(QIcon(":/player/" + _settings->theme() + "/play"));

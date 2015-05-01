@@ -28,7 +28,7 @@ class WindowsToolbar : public QObject, public MediaPlayerPlugin
 private:
 	Ui::ConfigForm _ui;
 
-	QWeakPointer<MediaPlayer> _mediaPlayer;
+	MediaPlayer *_mediaPlayer;
 
 	QWinThumbnailToolButton *_skipBackward;
 	QWinThumbnailToolButton *_playPause;
@@ -57,7 +57,7 @@ public:
 
 	inline virtual QWidget* providesView() { return NULL; }
 
-	virtual void setMediaPlayer(QWeakPointer<MediaPlayer>);
+	virtual void setMediaPlayer(MediaPlayer *) override;
 
 	inline virtual QString version() const { return "1.0"; }
 
