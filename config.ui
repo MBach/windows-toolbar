@@ -47,16 +47,6 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <widget class="QCheckBox" name="progressBarThumbnail">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Progress bar</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QCheckBox" name="mediaPlayerButtonsThumbnail">
         <property name="text">
          <string>Media player buttons</string>

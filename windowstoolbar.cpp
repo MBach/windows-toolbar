@@ -65,7 +65,6 @@ QWidget* WindowsToolbar::configPage()
 	// Init the UI with correct values
 	_ui.progressBarTaskbar->setChecked(_settings->value("WindowsToolbar/hasProgressBarInTaskbar").toBool());
 	_ui.overlayIconTaskbar->setChecked(_settings->value("WindowsToolbar/hasOverlayIcon").toBool());
-	_ui.progressBarThumbnail->setChecked(_settings->value("WindowsToolbar/hasProgressBarInThumbnail").toBool());
 	_ui.mediaPlayerButtonsThumbnail->setChecked(_settings->value("WindowsToolbar/hasMediaPlayerButtonsInThumbnail").toBool());
 
 	// Connect the UI with the settings
@@ -76,9 +75,6 @@ QWidget* WindowsToolbar::configPage()
 	connect(_ui.overlayIconTaskbar, &QCheckBox::stateChanged, [=](int s) {
 		_settings->setValue("WindowsToolbar/hasOverlayIcon", (s == Qt::Checked));
 		this->updateOverlayIcon();
-	});
-	connect(_ui.progressBarThumbnail, &QCheckBox::stateChanged, [=](int s) {
-		_settings->setValue("WindowsToolbar/hasProgressBarInThumbnail", (s == Qt::Checked));
 	});
 	connect(_ui.mediaPlayerButtonsThumbnail, &QCheckBox::stateChanged, [=](int s) {
 		_settings->setValue("WindowsToolbar/hasMediaPlayerButtonsInThumbnail", (s == Qt::Checked));
