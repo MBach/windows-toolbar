@@ -55,7 +55,7 @@ public:
 
 	inline virtual QString name() const { return "WindowsToolBar"; }
 
-	inline virtual QWidget* providesView() { return NULL; }
+	inline virtual QWidget* providesView() { return nullptr; }
 
 	virtual void setMediaPlayer(MediaPlayer *) override;
 

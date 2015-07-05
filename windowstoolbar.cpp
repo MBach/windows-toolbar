@@ -15,8 +15,8 @@
 #include <QtDebug>
 
 WindowsToolbar::WindowsToolbar()
-	: QObject(), _skipBackward(NULL), _playPause(NULL), _stop(NULL), _skipForward(NULL),
-	  _taskbarProgress(NULL), _thumbbar(NULL)
+	: QObject(), _skipBackward(nullptr), _playPause(nullptr), _stop(nullptr), _skipForward(nullptr),
+	  _taskbarProgress(nullptr), _thumbbar(nullptr)
 {
 	_settings = Settings::instance();
 	connect(_settings, &Settings::themeHasChanged, this, &WindowsToolbar::updateThumbnailToolBar);
@@ -197,7 +197,7 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 		///XXX the thumbnail window is not resizing properly when removing buttons?
 		_thumbbar->clear();
 		delete _thumbbar;
-		_thumbbar = NULL;
+		_thumbbar = nullptr;
 	}
 }
 
@@ -222,7 +222,7 @@ void WindowsToolbar::updateCover(const QString &uri)
 void WindowsToolbar::updateOverlayIcon()
 {
 	if (_settings->value("WindowsToolbar/hasOverlayIcon").toBool()) {
-		qDebug() << (_stop == NULL);
+		qDebug() << (_stop == nullptr);
 		switch (_mediaPlayer->state()) {
 		// Icons are inverted from updateThumbnailToolBar() method because it's reflecting the actual state of the player
 		case QMediaPlayer::PlayingState:
