@@ -97,6 +97,7 @@ void WindowsToolbar::init()
 		}
 		if (QScreen *screen = QGuiApplication::primaryScreen()) {
 			if (QWindow *w = QApplication::topLevelWindows().first()) {
+				QtWin::extendFrameIntoClientArea(w, -1, -1, -1, -1);
 				QPixmap originalPixmap = screen->grabWindow(w->winId());
 				_thumbbar->setIconicLivePreviewPixmap(originalPixmap);
 			}
@@ -158,11 +159,11 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 		_thumbbar->setIconicPixmapNotificationsEnabled(true);
 		connect(_thumbbar, &QWinThumbnailToolBar::iconicLivePreviewPixmapRequested, this, [=]() {
 			qDebug() << "iconicLivePreviewPixmapRequested";
-			/*QScreen *screen = QGuiApplication::primaryScreen();
+			QScreen *screen = QGuiApplication::primaryScreen();
 			if (screen) {
 				QPixmap originalPixmap = screen->grabWindow(0);
 				_thumbbar->setIconicLivePreviewPixmap(originalPixmap);
-			}*/
+			}
 		});
 		_thumbbar->setWindow(QGuiApplication::topLevelWindows().first());
 
@@ -207,6 +208,8 @@ void WindowsToolbar::updateCover(const QString &uri)
 	if (!_thumbbar) {
 		return;
 	}
+
+	qDebug() << Q_FUNC_INFO << uri;
 
 	SqlDatabase *db = SqlDatabase::instance();
 	Cover *c = db->selectCoverFromURI(uri);
