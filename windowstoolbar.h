@@ -7,7 +7,6 @@
 #include "interfaces/mediaplayerplugin.h"
 #include "model/trackdao.h"
 #include "mediaplayer.h"
-#include "settings.h"
 
 #include "ui_config.h"
 
@@ -19,7 +18,7 @@
  * \version     1.0
  * \copyright   GNU General Public License v3
  */
-class WindowsToolbar : public QObject, public MediaPlayerPlugin
+class WindowsToolbar : public MediaPlayerPlugin
 {
 	Q_OBJECT
 	Q_PLUGIN_METADATA(IID MediaPlayerPlugin_iid)
@@ -40,16 +39,16 @@ private:
 
 	QWinThumbnailToolBar *_thumbbar;
 
-	Settings *_settings;
-
 public:
-	explicit WindowsToolbar();
+	explicit WindowsToolbar(QObject *parent = nullptr);
 
 	virtual ~WindowsToolbar();
 
 	virtual QWidget *configPage();
 
 	inline virtual QStringList extensions() const { return QStringList(); }
+
+	virtual void init() override;
 
 	inline virtual bool isConfigurable() const { return true; }
 
@@ -62,12 +61,11 @@ public:
 	inline virtual QString version() const { return "1.0"; }
 
 private:
-	void init();
 	void showThumbnailButtons(bool visible);
 
 private slots:
 	/** Update the cover when the current media in the player has changed. */
-	void updateCover(const QString &uri);
+	void updateCover(const QString &uri = QString());
 
 	void updateOverlayIcon();
 

@@ -3,7 +3,7 @@ QT      += gui widgets multimedia sql winextras
 TARGET   = $$qtLibraryTarget(windows-toolbar)
 TEMPLATE = lib
 
-MiamPlayerBuildDirectory = C:\dev\Miam-Player-build\qt5.5.1\MiamPlayer
+MiamPlayerBuildDirectory = C:\dev\Miam-Player-build\qt5.6.0\MiamPlayer
 
 DEFINES += MIAM_PLUGIN
 

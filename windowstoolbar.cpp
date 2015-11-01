@@ -11,41 +11,43 @@
 #include <QWindow>
 
 #include "cover.h"
+#include "settings.h"
 
 #include <QtDebug>
 
-WindowsToolbar::WindowsToolbar()
-	: QObject(), _skipBackward(nullptr), _playPause(nullptr), _stop(nullptr), _skipForward(nullptr),
-	  _taskbarProgress(nullptr), _thumbbar(nullptr)
+WindowsToolbar::WindowsToolbar(QObject *parent)
+	: MediaPlayerPlugin(parent)
+	, _skipBackward(nullptr)
+	, _playPause(nullptr)
+	, _stop(nullptr)
+	, _skipForward(nullptr)
+	, _taskbarProgress(nullptr)
+	, _thumbbar(new QWinThumbnailToolBar(parent))
+	, _taskbarButton(new QWinTaskbarButton(parent))
 {
-	_settings = Settings::instance();
-	connect(_settings, &Settings::themeHasChanged, this, &WindowsToolbar::updateThumbnailToolBar);
+	_thumbbar->setIconicPixmapNotificationsEnabled(true);
+	auto settings = Settings::instance();
+	connect(settings, &Settings::themeHasChanged, this, &WindowsToolbar::updateThumbnailToolBar);
 
 	// First time (ever) the plugin is loaded
-	if (_settings->value("WindowsToolbar/hasProgressBarInTaskbar").isNull()) {
-		_settings->setValue("WindowsToolbar/hasProgressBarInTaskbar", true);
+	if (settings->value("WindowsToolbar/hasProgressBarInTaskbar").isNull()) {
+		settings->setValue("WindowsToolbar/hasProgressBarInTaskbar", true);
 	}
-	if (_settings->value("WindowsToolbar/hasMediaPlayerButtonsInThumbnail").isNull()) {
-		_settings->setValue("WindowsToolbar/hasMediaPlayerButtonsInThumbnail", true);
+	if (settings->value("WindowsToolbar/hasMediaPlayerButtonsInThumbnail").isNull()) {
+		settings->setValue("WindowsToolbar/hasMediaPlayerButtonsInThumbnail", true);
 	}
-	if (_settings->value("WindowsToolbar/hasOverlayIcon").isNull()) {
-		_settings->setValue("WindowsToolbar/hasOverlayIcon", false);
+	if (settings->value("WindowsToolbar/hasOverlayIcon").isNull()) {
+		settings->setValue("WindowsToolbar/hasOverlayIcon", false);
 	}
-
-	_taskbarButton = new QWinTaskbarButton(this);
+	_thumbbar->setIconicThumbnailPixmap(QPixmap(":/icons/mp_win32"));
 }
 
 WindowsToolbar::~WindowsToolbar()
-{
-	_taskbarButton->clearOverlayIcon();
-	_taskbarProgress->hide();
-	this->showThumbnailButtons(false);
-}
+{}
 
 void WindowsToolbar::setMediaPlayer(MediaPlayer *mediaPlayer)
 {
 	_mediaPlayer = mediaPlayer;
-	this->init();
 	connect(_mediaPlayer, &MediaPlayer::positionChanged, [=] (qint64 pos, qint64 duration) {
 		if (duration > 0) {
 			_taskbarProgress->setValue(100 * pos / duration);
@@ -55,7 +57,12 @@ void WindowsToolbar::setMediaPlayer(MediaPlayer *mediaPlayer)
 	connect(_mediaPlayer, &MediaPlayer::stateChanged, this, &WindowsToolbar::updateThumbnailToolBar);
 	connect(_mediaPlayer, &MediaPlayer::stateChanged, this, &WindowsToolbar::updateProgressbarTaskbar);
 	connect(_mediaPlayer, &MediaPlayer::currentMediaChanged, this, &WindowsToolbar::updateCover);
-	this->updateCover(QString());
+
+	// Init visibility of overlay icon
+	this->updateOverlayIcon();
+
+	// Init visibility of media buttons
+	this->showThumbnailButtons(Settings::instance()->value("WindowsToolbar/hasMediaPlayerButtonsInThumbnail").toBool());
 }
 
 QWidget* WindowsToolbar::configPage()
@@ -63,21 +70,22 @@ QWidget* WindowsToolbar::configPage()
 	QWidget *widget = new QWidget();
 	_ui.setupUi(widget);
 	// Init the UI with correct values
-	_ui.progressBarTaskbar->setChecked(_settings->value("WindowsToolbar/hasProgressBarInTaskbar").toBool());
-	_ui.overlayIconTaskbar->setChecked(_settings->value("WindowsToolbar/hasOverlayIcon").toBool());
-	_ui.mediaPlayerButtonsThumbnail->setChecked(_settings->value("WindowsToolbar/hasMediaPlayerButtonsInThumbnail").toBool());
+	auto settings = Settings::instance();
+	_ui.progressBarTaskbar->setChecked(settings->value("WindowsToolbar/hasProgressBarInTaskbar").toBool());
+	_ui.overlayIconTaskbar->setChecked(settings->value("WindowsToolbar/hasOverlayIcon").toBool());
+	_ui.mediaPlayerButtonsThumbnail->setChecked(settings->value("WindowsToolbar/hasMediaPlayerButtonsInThumbnail").toBool());
 
 	// Connect the UI with the settings
 	connect(_ui.progressBarTaskbar, &QCheckBox::stateChanged, [=](int s) {
-		_settings->setValue("WindowsToolbar/hasProgressBarInTaskbar", (s == Qt::Checked));
+		settings->setValue("WindowsToolbar/hasProgressBarInTaskbar", (s == Qt::Checked));
 		this->updateProgressbarTaskbar();
 	});
 	connect(_ui.overlayIconTaskbar, &QCheckBox::stateChanged, [=](int s) {
-		_settings->setValue("WindowsToolbar/hasOverlayIcon", (s == Qt::Checked));
+		settings->setValue("WindowsToolbar/hasOverlayIcon", (s == Qt::Checked));
 		this->updateOverlayIcon();
 	});
 	connect(_ui.mediaPlayerButtonsThumbnail, &QCheckBox::stateChanged, [=](int s) {
-		_settings->setValue("WindowsToolbar/hasMediaPlayerButtonsInThumbnail", (s == Qt::Checked));
+		settings->setValue("WindowsToolbar/hasMediaPlayerButtonsInThumbnail", (s == Qt::Checked));
 		this->showThumbnailButtons(s == Qt::Checked);
 	});
 	return widget;
@@ -85,24 +93,13 @@ QWidget* WindowsToolbar::configPage()
 
 void WindowsToolbar::init()
 {
+	/// XXX: if not set to false, it seems there's a glitch when one is hovering the thumbnail in the taskbar.
+	/// The resulting preview is a Window cursor "searching for something" indefinitely
+	QtWin::setWindowDisallowPeek(QGuiApplication::topLevelWindows().first(), true);
+
 	// Progress bar in the task bar
 	_taskbarButton->setWindow(QGuiApplication::topLevelWindows().first());
 	_taskbarProgress = _taskbarButton->progress();
-
-	QApplication *app = static_cast<QApplication*>(QApplication::instance());
-	connect(app, &QApplication::focusChanged, this, [=]() {
-		// qDebug() << "focus changed";
-		if (!_thumbbar) {
-			return;
-		}
-		if (QScreen *screen = QGuiApplication::primaryScreen()) {
-			if (QWindow *w = QApplication::topLevelWindows().first()) {
-				QtWin::extendFrameIntoClientArea(w, -1, -1, -1, -1);
-				QPixmap originalPixmap = screen->grabWindow(w->winId());
-				_thumbbar->setIconicLivePreviewPixmap(originalPixmap);
-			}
-		}
-	});
 
 	SqlDatabase *db = SqlDatabase::instance();
 	connect(db, &SqlDatabase::aboutToLoad, this, [=]() {
@@ -141,32 +138,11 @@ void WindowsToolbar::init()
 			}
 		}
 	});
-
-	// Init visibility of progressBar in the taskBar
-	_taskbarProgress->setVisible(_settings->value("WindowsToolbar/hasProgressBarInTaskbar").toBool());
-
-	// Init visibility of overlay icon
-	this->updateOverlayIcon();
-
-	// Init visibility of media buttons
-	this->showThumbnailButtons(_settings->value("WindowsToolbar/hasMediaPlayerButtonsInThumbnail").toBool());
 }
 
 void WindowsToolbar::showThumbnailButtons(bool visible)
 {
 	if (visible) {
-		_thumbbar = new QWinThumbnailToolBar(this);
-		_thumbbar->setIconicPixmapNotificationsEnabled(true);
-		connect(_thumbbar, &QWinThumbnailToolBar::iconicLivePreviewPixmapRequested, this, [=]() {
-			qDebug() << "iconicLivePreviewPixmapRequested";
-			QScreen *screen = QGuiApplication::primaryScreen();
-			if (screen) {
-				QPixmap originalPixmap = screen->grabWindow(0);
-				_thumbbar->setIconicLivePreviewPixmap(originalPixmap);
-			}
-		});
-		_thumbbar->setWindow(QGuiApplication::topLevelWindows().first());
-
 		// Four buttons are enough
 		_skipBackward = new QWinThumbnailToolButton(_thumbbar);
 		_playPause = new QWinThumbnailToolButton(_thumbbar);
@@ -177,11 +153,13 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 		_thumbbar->addButton(_playPause);
 		_thumbbar->addButton(_stop);
 		_thumbbar->addButton(_skipForward);
+		_thumbbar->setWindow(QGuiApplication::topLevelWindows().first());
 
-		_skipBackward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipBackward"));
+		auto settings = Settings::instance();
+		_skipBackward->setIcon(QIcon(":/player/" + settings->theme() + "/skipBackward"));
 		this->updateThumbnailToolBar();
-		_stop->setIcon(QIcon(":/player/" + _settings->theme() + "/stop"));
-		_skipForward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipForward"));
+		_stop->setIcon(QIcon(":/player/" + settings->theme() + "/stop"));
+		_skipForward->setIcon(QIcon(":/player/" + settings->theme() + "/skipForward"));
 
 		// Connect each buttons to the main program
 		connect(_skipBackward, &QWinThumbnailToolButton::clicked, _mediaPlayer, &MediaPlayer::skipBackward);
@@ -193,49 +171,44 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 				_mediaPlayer->play();
 			}
 		});
-		connect(_stop, &QWinThumbnailToolButton::clicked, _mediaPlayer, &MediaPlayer::stop);
-	} else if (_thumbbar) {
-		///XXX the thumbnail window is not resizing properly when removing buttons?
-		_thumbbar->clear();
-		delete _thumbbar;
-		_thumbbar = nullptr;
+		connect(_stop, &QWinThumbnailToolButton::clicked, this, [=]() {
+			_mediaPlayer->stop();
+			_thumbbar->setIconicThumbnailPixmap(QPixmap(":/icons/mp_win32"));
+		});
+	} else {
+		_thumbbar->removeButton(_skipBackward);
+		_thumbbar->removeButton(_playPause);
+		_thumbbar->removeButton(_stop);
+		_thumbbar->removeButton(_skipForward);
 	}
 }
 
 /** Update the cover when the current media in the player has changed. */
 void WindowsToolbar::updateCover(const QString &uri)
 {
-	if (!_thumbbar) {
-		return;
-	}
-
-	qDebug() << Q_FUNC_INFO << uri;
-
 	SqlDatabase *db = SqlDatabase::instance();
-	Cover *c = db->selectCoverFromURI(uri);
-	if (c) {
-		QPixmap p = QPixmap::fromImage(QImage::fromData(c->byteArray(), c->format()));
+	Cover *cover = db->selectCoverFromURI(uri);
+	if (cover) {
+		QPixmap p = QPixmap::fromImage(QImage::fromData(cover->byteArray(), cover->format()));
 		_thumbbar->setIconicThumbnailPixmap(p);
-		delete c;
-	} else {
-		_thumbbar->setIconicThumbnailPixmap(QPixmap(":/icons/mp_win32"));
+		delete cover;
 	}
 }
 
 void WindowsToolbar::updateOverlayIcon()
 {
-	if (_settings->value("WindowsToolbar/hasOverlayIcon").toBool()) {
-		qDebug() << (_stop == nullptr);
+	auto settings = Settings::instance();
+	if (settings->value("WindowsToolbar/hasOverlayIcon").toBool()) {
 		switch (_mediaPlayer->state()) {
 		// Icons are inverted from updateThumbnailToolBar() method because it's reflecting the actual state of the player
 		case QMediaPlayer::PlayingState:
-			_taskbarButton->setOverlayIcon(QIcon(":/player/" + _settings->theme() + "/play"));
+			_taskbarButton->setOverlayIcon(QIcon(":/player/" + settings->theme() + "/play"));
 			break;
 		case QMediaPlayer::PausedState:
-			_taskbarButton->setOverlayIcon(QIcon(":/player/" + _settings->theme() + "/pause"));
+			_taskbarButton->setOverlayIcon(QIcon(":/player/" + settings->theme() + "/pause"));
 			break;
 		case QMediaPlayer::StoppedState:
-			_taskbarButton->setOverlayIcon(QIcon(":/player/" + _settings->theme() + "/stop"));
+			_taskbarButton->setOverlayIcon(QIcon(":/player/" + settings->theme() + "/stop"));
 			break;
 		}
 	} else if (!_taskbarButton->overlayIcon().isNull()) {
@@ -245,18 +218,18 @@ void WindowsToolbar::updateOverlayIcon()
 
 void WindowsToolbar::updateProgressbarTaskbar()
 {
+	auto settings = Settings::instance();
 	switch (_mediaPlayer->state()) {
 	case QMediaPlayer::PlayingState:
 		_taskbarProgress->resume();
-		_taskbarProgress->setVisible(_settings->value("WindowsToolbar/hasProgressBarInTaskbar").toBool());
+		_taskbarProgress->setVisible(settings->value("WindowsToolbar/hasProgressBarInTaskbar").toBool());
 		break;
 	case QMediaPlayer::PausedState:
 		_taskbarProgress->pause();
-		_taskbarProgress->setVisible(_settings->value("WindowsToolbar/hasProgressBarInTaskbar").toBool());
+		_taskbarProgress->setVisible(settings->value("WindowsToolbar/hasProgressBarInTaskbar").toBool());
 		break;
 	case QMediaPlayer::StoppedState:
 		_taskbarProgress->hide();
-		_thumbbar->setIconicThumbnailPixmap(QPixmap(":/icons/mp_win32"));
 		break;
 	}
 }
@@ -264,12 +237,16 @@ void WindowsToolbar::updateProgressbarTaskbar()
 /** Update icons for buttons. */
 void WindowsToolbar::updateThumbnailToolBar()
 {
-	_skipBackward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipBackward"));
-	if (_mediaPlayer->state() == QMediaPlayer::PlayingState) {
-		_playPause->setIcon(QIcon(":/player/" + _settings->theme() + "/pause"));
-	} else {
-		_playPause->setIcon(QIcon(":/player/" + _settings->theme() + "/play"));
+	if (_skipBackward == nullptr) {
+		return;
 	}
-	_stop->setIcon(QIcon(":/player/" + _settings->theme() + "/stop"));
-	_skipForward->setIcon(QIcon(":/player/" + _settings->theme() + "/skipForward"));
+	auto settings = Settings::instance();
+	_skipBackward->setIcon(QIcon(":/player/" + settings->theme() + "/skipBackward"));
+	if (_mediaPlayer->state() == QMediaPlayer::PlayingState) {
+		_playPause->setIcon(QIcon(":/player/" + settings->theme() + "/pause"));
+	} else {
+		_playPause->setIcon(QIcon(":/player/" + settings->theme() + "/play"));
+	}
+	_stop->setIcon(QIcon(":/player/" + settings->theme() + "/stop"));
+	_skipForward->setIcon(QIcon(":/player/" + settings->theme() + "/skipForward"));
 }
