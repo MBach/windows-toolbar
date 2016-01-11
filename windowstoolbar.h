@@ -44,21 +44,21 @@ public:
 
 	virtual ~WindowsToolbar();
 
-	virtual QWidget *configPage();
+	virtual QWidget *configPage() override;
 
-	inline virtual QStringList extensions() const { return QStringList(); }
+	inline virtual QStringList extensions() const override { return QStringList(); }
 
 	virtual void init() override;
 
-	inline virtual bool isConfigurable() const { return true; }
+	inline virtual bool isConfigurable() const override { return true; }
 
-	inline virtual QString name() const { return "WindowsToolBar"; }
+	inline virtual QString name() const override { return "WindowsToolBar"; }
 
-	inline virtual QWidget* providesView() { return nullptr; }
+	inline virtual QWidget* providesView() override { return nullptr; }
 
 	virtual void setMediaPlayer(MediaPlayer *) override;
 
-	inline virtual QString version() const { return "1.0"; }
+	inline virtual QString version() const override { return "1.0"; }
 
 private:
 	void showThumbnailButtons(bool visible);
