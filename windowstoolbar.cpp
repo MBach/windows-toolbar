@@ -12,11 +12,13 @@
 
 #include "cover.h"
 #include "settings.h"
+#include "musicsearchengine.h"
 
 #include <QtDebug>
 
 WindowsToolbar::WindowsToolbar(QObject *parent)
 	: MediaPlayerPlugin(parent)
+	, _db(nullptr)
 	, _skipBackward(nullptr)
 	, _playPause(nullptr)
 	, _stop(nullptr)
@@ -101,8 +103,8 @@ void WindowsToolbar::init()
 	_taskbarButton->setWindow(QGuiApplication::topLevelWindows().first());
 	_taskbarProgress = _taskbarButton->progress();
 
-	SqlDatabase *db = SqlDatabase::instance();
-	connect(db, &SqlDatabase::aboutToLoad, this, [=]() {
+	/// FIXME
+	connect(_db, &SqlDatabase::aboutToLoad, this, [=]() {
 		_mediaPlayer->blockSignals(true);
 		if (_mediaPlayer->state() != QMediaPlayer::StoppedState) {
 			_taskbarProgress->setProperty("previousVisible", true);
@@ -112,8 +114,8 @@ void WindowsToolbar::init()
 			_taskbarProgress->setPaused(false);
 		}
 	});
-	connect(db, &SqlDatabase::progressChanged, _taskbarProgress, &QWinTaskbarProgress::setValue);
-	connect(db, &SqlDatabase::loaded, this, [=]() {
+	connect(_db->musicSearchEngine(), &MusicSearchEngine::progressChanged, _taskbarProgress, &QWinTaskbarProgress::setValue);
+	connect(_db->musicSearchEngine(), &MusicSearchEngine::searchHasEnded, this, [=]() {
 		_mediaPlayer->blockSignals(false);
 		bool b = _taskbarProgress->property("previousVisible").toBool();
 		if (b) {
@@ -186,8 +188,9 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 /** Update the cover when the current media in the player has changed. */
 void WindowsToolbar::updateCover(const QString &uri)
 {
-	SqlDatabase *db = SqlDatabase::instance();
-	Cover *cover = db->selectCoverFromURI(uri);
+	SqlDatabase db;
+	db.open();
+	Cover *cover = db.selectCoverFromURI(uri);
 	if (cover) {
 		QPixmap p = QPixmap::fromImage(QImage::fromData(cover->byteArray(), cover->format()));
 		_thumbbar->setIconicThumbnailPixmap(p);

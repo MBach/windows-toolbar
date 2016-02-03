@@ -3,19 +3,19 @@ QT      += gui widgets multimedia sql winextras
 TARGET   = $$qtLibraryTarget(windows-toolbar)
 TEMPLATE = lib
 
-MiamPlayerBuildDirectory = C:\dev\Miam-Player-build\src\MiamPlayer
+MiamPlayerBuildDirectory = C:\dev\Miam-Player-build\src\Player
 
 DEFINES += MIAM_PLUGIN
 
 CONFIG  += dll c++11
 CONFIG(debug, debug|release) {
     target.path = $$MiamPlayerBuildDirectory\debug\plugins
-    LIBS += -Ldebug -lMiamCore
+    LIBS += -Ldebug -lCore
 }
 
 CONFIG(release, debug|release) {
     target.path = $$MiamPlayerBuildDirectory\release\plugins
-    LIBS += -Lrelease -lMiamCore
+    LIBS += -Lrelease -lCore
 }
 
 INSTALLS += target
@@ -34,6 +34,7 @@ HEADERS += interfaces/basicplugin.h \
     mediaplayer.h \
     mediaplaylist.h \
     miamcore_global.h \
+    musicsearchengine.h \
     settings.h \
     windowstoolbar.h
 

@@ -27,6 +27,7 @@ class WindowsToolbar : public MediaPlayerPlugin
 private:
 	Ui::ConfigForm _ui;
 
+	SqlDatabase *_db;
 	MediaPlayer *_mediaPlayer;
 
 	QWinThumbnailToolButton *_skipBackward;
@@ -44,6 +45,8 @@ public:
 
 	virtual ~WindowsToolbar();
 
+	inline virtual bool canInteractSearchEngine() const { return true; }
+
 	virtual QWidget *configPage() override;
 
 	inline virtual QStringList extensions() const override { return QStringList(); }
@@ -56,9 +59,11 @@ public:
 
 	inline virtual QWidget* providesView() override { return nullptr; }
 
+	inline virtual void setDatabase(SqlDatabase *db) { _db = db; }
+
 	virtual void setMediaPlayer(MediaPlayer *) override;
 
-	inline virtual QString version() const override { return "1.0"; }
+	inline virtual QString version() const override { return "1.1"; }
 
 private:
 	void showThumbnailButtons(bool visible);

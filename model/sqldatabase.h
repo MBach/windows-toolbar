@@ -13,7 +13,7 @@
 #include <QSqlDatabase>
 #include <QSqlTableModel>
 #include <QThread>
-#include <QWeakPointer>
+#include <QUrl>
 
 /// Forward declarations
 class Cover;
@@ -29,13 +29,6 @@ class MIAMCORE_LIBRARY SqlDatabase : public QObject, public QSqlDatabase
 {
 	Q_OBJECT
 private:
-	static SqlDatabase *_sqlDatabase;
-
-	SqlDatabase();
-
-	/** This worker is used to avoid a blocking UI when scanning the FileSystem. */
-	QThread _workerThread;
-
 	/** Object than can iterate throught the FileSystem for Audio files. */
 	MusicSearchEngine *_musicSearchEngine;
 
@@ -44,8 +37,11 @@ private:
 	Q_ENUMS(extension)
 
 public:
-	/** Singleton pattern to be able to easily use settings everywhere in the app. */
-	static SqlDatabase* instance();
+	SqlDatabase();
+
+	~SqlDatabase();
+
+	void init();
 
 	MusicSearchEngine * musicSearchEngine() const;
 
@@ -85,19 +81,9 @@ private:
 	/** When one has manually updated tracks with TagEditor, some nodes might in unstable state. */
 	bool cleanNodesWithoutTracks();
 
-	void loadFlatModel();
-
-	/** Read all tracks entries in the database and send them to connected views. */
-	void loadFromFileDB(bool sendResetSignal = true);
-
 public slots:
-	/** Load an existing database file or recreate it, if not found. */
-	void load(Settings::RequestSqlModel requestedModel = Settings::RSM_Hierarchical);
-
-	/** Delete and rescan local tracks. */
+	/** Delete cache and rescan local tracks. */
 	void rebuild();
-
-	void rebuild(const QStringList &oldLocations, const QStringList &newLocations);
 
 private slots:
 	/** Reads an external picture which is close to multimedia files (same folder). */
@@ -110,16 +96,11 @@ signals:
 	void aboutToLoad();
 	void aboutToResyncRemoteSources();
 	void coverWasUpdated(const QFileInfo &);
-	void loaded();
-	void progressChanged(const int &);
 
 	void nodeExtracted(GenericDAO *node);
-	void tracksExtracted(const QList<TrackDAO> &);
-	void artistsExtracted(const QList<ArtistDAO> &);
-	void albumsExtracted(const QList<AlbumDAO> &);
 	void aboutToUpdateNode(GenericDAO *node);
 
-	//void aboutToUpdateView(const QList<FileHelper*> &olds, const QList<FileHelper*> &news);
+	void aboutToUpdateView(const QList<QUrl> &oldTracks, const QList<QUrl> &newTracks);
 	void aboutToCleanView();
 };
 
