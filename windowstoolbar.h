@@ -27,7 +27,7 @@ class WindowsToolbar : public MediaPlayerPlugin
 private:
 	Ui::ConfigForm _ui;
 
-	SqlDatabase *_db;
+	MusicSearchEngine *_musicSearchEngine;
 	MediaPlayer *_mediaPlayer;
 
 	QWinThumbnailToolButton *_skipBackward;
@@ -59,7 +59,7 @@ public:
 
 	inline virtual QWidget* providesView() override { return nullptr; }
 
-	inline virtual void setDatabase(SqlDatabase *db) { _db = db; }
+	inline virtual void setMusicSearchEngine(MusicSearchEngine *musicSearchEngine) { _musicSearchEngine = musicSearchEngine; }
 
 	virtual void setMediaPlayer(MediaPlayer *) override;
 

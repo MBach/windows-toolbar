@@ -18,7 +18,7 @@
 
 WindowsToolbar::WindowsToolbar(QObject *parent)
 	: MediaPlayerPlugin(parent)
-	, _db(nullptr)
+	, _musicSearchEngine(nullptr)
 	, _skipBackward(nullptr)
 	, _playPause(nullptr)
 	, _stop(nullptr)
@@ -103,8 +103,7 @@ void WindowsToolbar::init()
 	_taskbarButton->setWindow(QGuiApplication::topLevelWindows().first());
 	_taskbarProgress = _taskbarButton->progress();
 
-	/// FIXME
-	connect(_db, &SqlDatabase::aboutToLoad, this, [=]() {
+	/*connect(_musicSearchEngine, &MusicSearchEngine::aboutToSearch, this, [=]() {
 		_mediaPlayer->blockSignals(true);
 		if (_mediaPlayer->state() != QMediaPlayer::StoppedState) {
 			_taskbarProgress->setProperty("previousVisible", true);
@@ -114,8 +113,8 @@ void WindowsToolbar::init()
 			_taskbarProgress->setPaused(false);
 		}
 	});
-	connect(_db->musicSearchEngine(), &MusicSearchEngine::progressChanged, _taskbarProgress, &QWinTaskbarProgress::setValue);
-	connect(_db->musicSearchEngine(), &MusicSearchEngine::searchHasEnded, this, [=]() {
+	connect(_musicSearchEngine, &MusicSearchEngine::progressChanged, _taskbarProgress, &QWinTaskbarProgress::setValue);
+	connect(_musicSearchEngine, &MusicSearchEngine::searchHasEnded, this, [=]() {
 		_mediaPlayer->blockSignals(false);
 		bool b = _taskbarProgress->property("previousVisible").toBool();
 		if (b) {
@@ -126,7 +125,7 @@ void WindowsToolbar::init()
 			_taskbarProgress->setValue(0);
 			_taskbarProgress->hide();
 		}
-	});
+	});*/
 
 	// If one has switched to another view (like a plugin which brings a new view mode), reroute these buttons
 	connect(_taskbarButton->window(), &QWindow::activeChanged, this, [=](){
@@ -189,7 +188,6 @@ void WindowsToolbar::showThumbnailButtons(bool visible)
 void WindowsToolbar::updateCover(const QString &uri)
 {
 	SqlDatabase db;
-	db.open();
 	Cover *cover = db.selectCoverFromURI(uri);
 	if (cover) {
 		QPixmap p = QPixmap::fromImage(QImage::fromData(cover->byteArray(), cover->format()));
