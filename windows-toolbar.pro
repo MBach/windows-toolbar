@@ -36,7 +36,8 @@ HEADERS += interfaces/basicplugin.h \
     miamcore_global.h \
     musicsearchengine.h \
     settings.h \
-    windowstoolbar.h
+    windowstoolbar.h \
+    mediaplayercontrol.h
 
 SOURCES += windowstoolbar.cpp
 

@@ -28,12 +28,13 @@ private:
 	Ui::ConfigForm _ui;
 
 	MusicSearchEngine *_musicSearchEngine;
-	MediaPlayer *_mediaPlayer;
+	MediaPlayerControl *_mediaPlayerControl;
 
 	QWinThumbnailToolButton *_skipBackward;
 	QWinThumbnailToolButton *_playPause;
 	QWinThumbnailToolButton *_stop;
 	QWinThumbnailToolButton *_skipForward;
+	QWinThumbnailToolButton *_toggleShuffle;
 
 	QWinTaskbarButton* _taskbarButton;
 	QWinTaskbarProgress* _taskbarProgress;
@@ -45,11 +46,11 @@ public:
 
 	virtual ~WindowsToolbar();
 
-	inline virtual bool canInteractSearchEngine() const { return true; }
-
 	virtual QWidget *configPage() override;
 
 	inline virtual QStringList extensions() const override { return QStringList(); }
+
+	inline virtual bool hasView() const override { return false; }
 
 	virtual void init() override;
 
@@ -57,11 +58,9 @@ public:
 
 	inline virtual QString name() const override { return "WindowsToolBar"; }
 
-	inline virtual QWidget* providesView() override { return nullptr; }
-
 	inline virtual void setMusicSearchEngine(MusicSearchEngine *musicSearchEngine) { _musicSearchEngine = musicSearchEngine; }
 
-	virtual void setMediaPlayer(MediaPlayer *) override;
+	virtual void setMediaPlayerControl(MediaPlayerControl *mediaPlayerControl) override;
 
 	inline virtual QString version() const override { return "1.1"; }
 
