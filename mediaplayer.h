@@ -37,6 +37,8 @@ public:
 
 	void addRemotePlayer(IMediaPlayer *remotePlayer);
 
+	QString currentTrack() const;
+
 	/** Current duration of the media, in ms. */
 	qint64 duration();
 
@@ -60,6 +62,8 @@ public:
 
 	/** Play track directly in the player, without playlist. */
 	void playMediaContent(const QMediaContent &mc);
+
+	qreal volume() const;
 
 private:
 	/** Current position in the media, percent-based. */
@@ -103,6 +107,7 @@ signals:
 	void mediaStatusChanged(QMediaPlayer::MediaStatus);
 	void positionChanged(qint64 pos, qint64 duration);
 	void stateChanged(QMediaPlayer::State);
+	void volumeChanged(qreal v);
 };
 
 #endif // MEDIAPLAYER_H

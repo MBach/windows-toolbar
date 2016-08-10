@@ -22,13 +22,11 @@ INSTALLS += target
 
 HEADERS += interfaces/basicplugin.h \
     interfaces/mediaplayerplugin.h \
-    model/albumdao.h \
-    model/artistdao.h \
     model/genericdao.h \
     model/playlistdao.h \
     model/sqldatabase.h \
     model/trackdao.h \
-    model/yeardao.h \
+    abstractmediaplayercontrol.h \
     cover.h \
     filehelper.h \
     mediaplayer.h \
@@ -36,8 +34,7 @@ HEADERS += interfaces/basicplugin.h \
     miamcore_global.h \
     musicsearchengine.h \
     settings.h \
-    windowstoolbar.h \
-    mediaplayercontrol.h
+    windowstoolbar.h
 
 SOURCES += windowstoolbar.cpp
 

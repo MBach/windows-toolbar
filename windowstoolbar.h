@@ -28,7 +28,7 @@ private:
 	Ui::ConfigForm _ui;
 
 	MusicSearchEngine *_musicSearchEngine;
-	MediaPlayerControl *_mediaPlayerControl;
+	AbstractMediaPlayerControl *_mediaPlayerControl;
 
 	QWinThumbnailToolButton *_skipBackward;
 	QWinThumbnailToolButton *_playPause;
@@ -60,7 +60,7 @@ public:
 
 	inline virtual void setMusicSearchEngine(MusicSearchEngine *musicSearchEngine) { _musicSearchEngine = musicSearchEngine; }
 
-	virtual void setMediaPlayerControl(MediaPlayerControl *mediaPlayerControl) override;
+	virtual void setMediaPlayerControl(AbstractMediaPlayerControl *mediaPlayerControl) override;
 
 	inline virtual QString version() const override { return "1.1"; }
 

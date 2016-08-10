@@ -51,7 +51,7 @@ WindowsToolbar::~WindowsToolbar()
 	this->disconnect();
 }
 
-void WindowsToolbar::setMediaPlayerControl(MediaPlayerControl *mediaPlayerControl)
+void WindowsToolbar::setMediaPlayerControl(AbstractMediaPlayerControl *mediaPlayerControl)
 {
 	_mediaPlayerControl = mediaPlayerControl;
 
@@ -72,9 +72,9 @@ void WindowsToolbar::setMediaPlayerControl(MediaPlayerControl *mediaPlayerContro
 	this->showThumbnailButtons(Settings::instance()->value("WindowsToolbar/hasMediaPlayerButtonsInThumbnail").toBool());
 
 	// Connect each buttons to the main program
-	connect(_skipBackward, &QWinThumbnailToolButton::clicked, _mediaPlayerControl, &MediaPlayerControl::skipBackward);
-	connect(_skipForward, &QWinThumbnailToolButton::clicked, _mediaPlayerControl, &MediaPlayerControl::skipForward);
-	connect(_playPause, &QWinThumbnailToolButton::clicked, _mediaPlayerControl, &MediaPlayerControl::togglePlayback);
+	connect(_skipBackward, &QWinThumbnailToolButton::clicked, _mediaPlayerControl, &AbstractMediaPlayerControl::skipBackward);
+	connect(_skipForward, &QWinThumbnailToolButton::clicked, _mediaPlayerControl, &AbstractMediaPlayerControl::skipForward);
+	connect(_playPause, &QWinThumbnailToolButton::clicked, _mediaPlayerControl, &AbstractMediaPlayerControl::togglePlayback);
 	connect(_stop, &QWinThumbnailToolButton::clicked, this, [=]() {
 		_mediaPlayerControl->stop();
 		_thumbbar->setIconicThumbnailPixmap(QPixmap(":/icons/mp_win32"));

@@ -6,7 +6,6 @@
 #include <QTimer>
 
 #include "miamcore_global.h"
-#include <model/sqldatabase.h>
 
 /**
  * \brief		The MusicSearchEngine class
@@ -17,23 +16,21 @@ class MIAMCORE_LIBRARY MusicSearchEngine : public QObject
 {
 	Q_OBJECT
 private:
-	SqlDatabase _db;
 	QTimer *_timer;
-	QStringList _delta;
+	//QStringList _delta;
 
 public:
 	static bool isScanning;
 
 	MusicSearchEngine(QObject *parent = nullptr);
 
-	void setDelta(const QStringList &delta);
+	//void setDelta(const QStringList &delta);
 
 	void setWatchForChanges(bool b);
 
 public slots:
 	void doSearch();
 
-private slots:
 	void watchForChanges();
 
 signals:

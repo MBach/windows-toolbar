@@ -43,7 +43,8 @@ public:
 						VP_LibraryHasCoverBelowTracks		= 11,
 						VP_LibraryCoverBelowTracksOpacity	= 12,
 						VP_LibraryHasStarsNextToTrack		= 13,
-						VP_LibraryHasStarsForUnrated		= 14};
+						VP_LibraryHasStarsForUnrated		= 14,
+						VP_CanSendTracksToEditor			= 15};
 
 	/** Singleton Pattern to easily use Settings everywhere in the app. */
 	static Settings* instance();
@@ -54,13 +55,11 @@ public:
 	qreal coverBelowTracksOpacity() const;
 
 	/** Returns the size of a cover. */
-	int coverSize() const;
+	int coverSizeLibraryTree() const;
+	int coverSizeUniqueLibrary() const;
 
 	/** Returns true if big and faded covers are displayed in the library when an album is expanded. */
 	bool isCoverBelowTracksEnabled() const;
-
-	/** Returns true if covers are displayed in the library. */
-	bool isCoversEnabled() const;
 
 	/** Returns true if the button in parameter is visible or not. */
 	bool isMediaButtonVisible(const QString & buttonName) const;
@@ -80,7 +79,8 @@ public:
 
 	void setCovers(bool b);
 
-	void setCoverSize(int s);
+	void setCoverSizeLibraryTree(int s);
+	void setCoverSizeUniqueLibrary(int s);
 
 	/** Sets if the button in parameter is visible or not. */
 	void setMediaButtonVisible(const QString & buttonName, const bool &value);
