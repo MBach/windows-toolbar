@@ -16,27 +16,16 @@ CONFIG(release, debug|release) {
 
 DESTDIR += $$OUT_PWD/../../player/release/plugins
 
-HEADERS += interfaces/basicplugin.h \
-    interfaces/mediaplayerplugin.h \
-    model/genericdao.h \
-    model/playlistdao.h \
-    model/sqldatabase.h \
-    model/trackdao.h \
-    abstractmediaplayercontrol.h \
-    cover.h \
-    filehelper.h \
-    mediaplayer.h \
-    mediaplaylist.h \
-    miamcore_global.h \
-    musicsearchengine.h \
-    settings.h \
-    windowstoolbar.h
+HEADERS += windowstoolbar.h
 
 SOURCES += windowstoolbar.cpp
 
 FORMS += config.ui
 
 RESOURCES += resources.qrc
+
+INCLUDEPATH += $$PWD/../../core/
+DEPENDPATH += $$PWD/../../core
 
 TRANSLATIONS += translations/WindowsToolBar_ar.ts \
     translations/WindowsToolBar_cs.ts \

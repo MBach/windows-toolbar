@@ -3,10 +3,9 @@
 
 #include <QtWinExtras>
 
-#include "miamcore_global.h"
-#include "interfaces/mediaplayerplugin.h"
-#include "model/trackdao.h"
-#include "mediaplayer.h"
+#include <interfaces/mediaplayerplugin.h>
+#include <model/trackdao.h>
+#include <mediaplayer.h>
 
 #include "ui_config.h"
 

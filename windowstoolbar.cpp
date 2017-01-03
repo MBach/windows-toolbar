@@ -1,5 +1,9 @@
 #include "windowstoolbar.h"
-#include "model/sqldatabase.h"
+
+#include <model/sqldatabase.h>
+#include <cover.h>
+#include <musicsearchengine.h>
+#include <settings.h>
 
 #include <QFile>
 #include <QGuiApplication>
@@ -9,10 +13,6 @@
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 #include <QWindow>
-
-#include "cover.h"
-#include "settings.h"
-#include "musicsearchengine.h"
 
 #include <QtDebug>
 
